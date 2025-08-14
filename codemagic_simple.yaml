@@ -1,0 +1,17 @@
+workflows:
+  ios-simple:
+    name: iOS Simple Build
+    environment:
+      xcode: latest
+      flutter: stable
+    scripts:
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Flutter build ipa
+        script: flutter build ipa --debug
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com

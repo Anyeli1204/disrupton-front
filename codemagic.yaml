@@ -1,0 +1,41 @@
+workflows:
+  ios-workflow:
+    name: iOS Workflow
+    environment:
+      xcode: latest
+      cocoapods: default
+      vars:
+        XCODE_PROJECT: "ios/Runner.xcworkspace"
+        XCODE_SCHEME: "Runner"
+        BUNDLE_ID: "com.disrupton.app"
+        CERTIFICATE_PASSWORD: $CM_CERTIFICATE_PASSWORD
+        KEYCHAIN_PASSWORD: $CM_KEYCHAIN_PASSWORD
+        TEAM_ID: $CM_TEAM_ID
+        PROVISIONING_PROFILE_SPECIFIER: $CM_PROVISIONING_PROFILE_SPECIFIER
+        CODE_SIGN_IDENTITY: $CM_CODE_SIGN_IDENTITY
+        DEVELOPMENT_TEAM: $CM_DEVELOPMENT_TEAM
+      flutter: stable
+      node: latest
+    scripts:
+      - name: Set up code signing settings on Xcode project
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "com.disrupton.app" --type IOS_APP_STORE --create
+          keychain add-certificates
+          xcode-project use-profiles
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Flutter build ipa
+        script: |
+          flutter build ipa --release \
+            --export-options-plist=/tmp/exportOptions.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+    publishing:
+      app_store_connect:
+        api_key: $CM_APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $CM_APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $CM_APP_STORE_CONNECT_ISSUER_ID
+        submit_to_testflight: true
