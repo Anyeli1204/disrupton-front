@@ -4,6 +4,8 @@ workflows:
     environment:
       xcode: latest
       flutter: stable
+      groups:
+        - variables
       vars:
         XCODE_PROJECT: "ios/Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
