@@ -1,9 +1,11 @@
 workflows:
-  default:
+  ios-build:
     name: iOS Build Only
     environment:
       xcode: latest
       flutter: stable
+      groups:
+        - variables
       vars:
         XCODE_PROJECT: "ios/Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
@@ -14,11 +16,7 @@ workflows:
       - name: Get Flutter packages
         script: flutter pub get
       - name: Flutter build ipa
-        script: |
-          flutter build ipa \
-            --debug \
-            --no-tree-shake-icons \
-            --target-platform ios-arm64
+        script: flutter build ipa --debug --no-tree-shake-icons
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
