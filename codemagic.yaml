@@ -15,10 +15,10 @@ workflows:
     scripts:
       - name: Get Flutter packages
         script: flutter pub get
-      - name: Flutter build ipa
-        script: flutter build ipa --debug --no-tree-shake-icons --no-codesign
+      - name: Flutter build ios
+        script: flutter build ios --debug --no-tree-shake-icons --simulator
     artifacts:
-      - build/ios/ipa/*.ipa
+      - build/ios/Debug-iphonesimulator/*.app
     publishing:
       email:
         recipients:
