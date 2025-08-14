@@ -17,8 +17,7 @@ workflows:
         script: |
           flutter build ipa \
             --debug \
-            --no-tree-shake-icons \
-            --target-platform ios-arm64
+            --no-tree-shake-icons
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
