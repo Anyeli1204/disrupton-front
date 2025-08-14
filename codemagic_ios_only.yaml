@@ -1,6 +1,6 @@
 workflows:
-  ios-free:
-    name: iOS Free Account Build
+  ios-only:
+    name: iOS Only Build
     environment:
       xcode: latest
       flutter: stable
@@ -14,7 +14,11 @@ workflows:
       - name: Get Flutter packages
         script: flutter pub get
       - name: Flutter build ipa
-        script: flutter build ipa --debug --no-tree-shake-icons
+        script: |
+          flutter build ipa \
+            --debug \
+            --no-tree-shake-icons \
+            --target-platform ios-arm64
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
