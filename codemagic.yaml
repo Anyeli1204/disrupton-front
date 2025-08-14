@@ -15,8 +15,15 @@ workflows:
     scripts:
       - name: Get Flutter packages
         script: flutter pub get
-      - name: Flutter build ios
-        script: flutter build ios --debug --no-tree-shake-icons --simulator
+      - name: Clean and rebuild iOS
+        script: |
+          flutter clean
+          flutter pub get
+          cd ios
+          pod deintegrate
+          pod install
+          cd ..
+          flutter build ios --debug --no-tree-shake-icons --simulator
     artifacts:
       - build/ios/Debug-iphonesimulator/*.app
     publishing:
