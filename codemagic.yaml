@@ -14,7 +14,12 @@ workflows:
       - name: Get Flutter packages
         script: flutter pub get
       - name: Flutter build ipa
-        script: flutter build ipa --debug --no-tree-shake-icons
+        script: |
+          flutter build ipa \
+            --debug \
+            --no-tree-shake-icons \
+            --target-platform ios-arm64 \
+            --dart-define=FLUTTER_TARGET_PLATFORM=ios
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
