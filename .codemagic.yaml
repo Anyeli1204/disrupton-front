@@ -1,6 +1,6 @@
 workflows:
   default:
-    name: iOS Build Only
+    name: iOS Build Only - Fixed
     environment:
       xcode: latest
       flutter: stable
