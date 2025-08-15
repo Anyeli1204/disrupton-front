@@ -1,6 +1,6 @@
 workflows:
-  testflight-build:
-    name: TestFlight Build
+  firebase-distribution:
+    name: Firebase App Distribution
     environment:
       xcode: latest
       flutter: stable
@@ -10,12 +10,12 @@ workflows:
         XCODE_PROJECT: "ios/Runner.xcworkspace"
         XCODE_SCHEME: "Runner"
         BUNDLE_ID: "com.disrupton.app"
-        TEAM_ID: $CM_TEAM_ID
-        DEVELOPMENT_TEAM: $CM_DEVELOPMENT_TEAM
+        FIREBASE_APP_ID: $FIREBASE_APP_ID
+        FIREBASE_TOKEN: $FIREBASE_TOKEN
     scripts:
       - name: Get Flutter packages
         script: flutter pub get
-      - name: Build for TestFlight
+      - name: Build for Firebase Distribution
         script: |
           flutter clean
           flutter pub get
@@ -23,13 +23,14 @@ workflows:
           pod deintegrate
           pod install
           cd ..
-          flutter build ipa --release --no-tree-shake-icons
-      - name: Upload to TestFlight
+          flutter build ipa --debug --no-tree-shake-icons --export-options-plist=ios/ExportOptions.plist
+      - name: Upload to Firebase App Distribution
         script: |
-          xcrun altool --upload-app --type ios --file "build/ios/ipa/*.ipa" \
-            --username "$APP_STORE_CONNECT_USERNAME" \
-            --password "$APP_STORE_CONNECT_PASSWORD" \
-            --asc-provider "$TEAM_ID"
+          firebase appdistribution:distribute "build/ios/ipa/*.ipa" \
+            --app $FIREBASE_APP_ID \
+            --token $FIREBASE_TOKEN \
+            --groups "tester" \
+            --release-notes "Nueva versión de Disrupton App con mejoras en AR"
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
