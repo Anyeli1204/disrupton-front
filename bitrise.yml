@@ -62,15 +62,21 @@ workflows:
             #!/bin/bash
             set -ex
             
+            echo "Starting IPA conversion..."
+            
             # Find the xcarchive file
-            XCARCHIVE_PATH=$(find build/ios/archive -name "*.xcarchive" | head -1)
+            XCARCHIVE_PATH=$(find . -name "*.xcarchive" | head -1)
             
             if [ -z "$XCARCHIVE_PATH" ]; then
-              echo "No xcarchive file found"
+              echo "No xcarchive file found in current directory"
+              find . -name "*.xcarchive" -o -name "*.zip"
               exit 1
             fi
             
             echo "Found xcarchive: $XCARCHIVE_PATH"
+            
+            # Create output directory
+            mkdir -p build/ios/ipa
             
             # Export to IPA
             xcodebuild -exportArchive \
@@ -79,10 +85,17 @@ workflows:
               -exportOptionsPlist ios/ExportOptions.plist
             
             # List generated files
+            echo "Generated files:"
             ls -la build/ios/ipa/
             
             # Copy IPA to artifacts directory
-            cp build/ios/ipa/*.ipa $BITRISE_DEPLOY_DIR/
+            if [ -f build/ios/ipa/*.ipa ]; then
+              cp build/ios/ipa/*.ipa $BITRISE_DEPLOY_DIR/
+              echo "IPA copied to artifacts directory"
+            else
+              echo "No IPA file found after conversion"
+              exit 1
+            fi
     - save-dart-cache@1: {}
     - deploy-to-bitrise-io@2: {}
     triggers:
