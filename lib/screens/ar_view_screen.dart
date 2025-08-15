@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:ar_flutter_plugin/ar_flutter_plugin.dart';
-import 'package:ar_flutter_plugin/datatypes/node_types.dart';
-import 'package:ar_flutter_plugin/managers/ar_location_manager.dart';
-import 'package:ar_flutter_plugin/managers/ar_session_manager.dart';
-import 'package:ar_flutter_plugin/managers/ar_object_manager.dart';
-import 'package:ar_flutter_plugin/managers/ar_anchor_manager.dart';
+import 'package:ar_flutter_plugin_updated/ar_flutter_plugin.dart';
+import 'package:ar_flutter_plugin_updated/datatypes/node_types.dart';
+import 'package:ar_flutter_plugin_updated/managers/ar_location_manager.dart';
+import 'package:ar_flutter_plugin_updated/managers/ar_session_manager.dart';
+import 'package:ar_flutter_plugin_updated/managers/ar_object_manager.dart';
+import 'package:ar_flutter_plugin_updated/managers/ar_anchor_manager.dart';
+import 'package:ar_flutter_plugin_updated/models/ar_node.dart';
+import 'package:ar_flutter_plugin_updated/models/ar_anchor.dart';
+import 'package:ar_flutter_plugin_updated/widgets/ar_view.dart';
+import 'package:vector_math/vector_math_64.dart' hide Colors;
 import '../models/pieza.dart';
 import '../utils/model_loader.dart';
 
 class ARViewScreen extends StatefulWidget {
   final Pieza pieza;
 
-  const ARViewScreen({Key? key, required this.pieza}) : super(key: key);
+  const ARViewScreen({super.key, required this.pieza});
 
   @override
-  _ARViewScreenState createState() => _ARViewScreenState();
+  State<ARViewScreen> createState() => _ARViewScreenState();
 }
 
 class _ARViewScreenState extends State<ARViewScreen> {
@@ -104,7 +108,7 @@ class _ARViewScreenState extends State<ARViewScreen> {
         }
       }
     } catch (e) {
-      print('Error cargando modelo 3D: $e');
+      debugPrint('Error cargando modelo 3D: $e');
     }
   }
 
@@ -118,18 +122,18 @@ class _ARViewScreenState extends State<ARViewScreen> {
         children: [
           FloatingActionButton(
             onPressed: _resetModel,
-            child: Icon(Icons.refresh),
             backgroundColor: Colors.blue,
+            child: const Icon(Icons.refresh),
           ),
           FloatingActionButton(
             onPressed: _toggleModelVisibility,
-            child: Icon(Icons.visibility),
             backgroundColor: Colors.green,
+            child: const Icon(Icons.visibility),
           ),
           FloatingActionButton(
             onPressed: _scaleModel,
-            child: Icon(Icons.zoom_in),
             backgroundColor: Colors.orange,
+            child: const Icon(Icons.zoom_in),
           ),
         ],
       ),
@@ -142,7 +146,7 @@ class _ARViewScreenState extends State<ARViewScreen> {
       left: 20,
       right: 20,
       child: Container(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.black87,
           borderRadius: BorderRadius.circular(12),
@@ -153,18 +157,18 @@ class _ARViewScreenState extends State<ARViewScreen> {
           children: [
             Text(
               widget.pieza.nombre,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               widget.pieza.descripcion,
-              style: TextStyle(color: Colors.white70),
+              style: const TextStyle(color: Colors.white70),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               'Época: ${widget.pieza.epoca}',
               style: TextStyle(color: Colors.blue[300]),
@@ -177,13 +181,16 @@ class _ARViewScreenState extends State<ARViewScreen> {
 
   void _resetModel() {
     // Resetear posición y rotación del modelo
+    debugPrint('Reseteando modelo');
   }
 
   void _toggleModelVisibility() {
     // Alternar visibilidad del modelo
+    debugPrint('Alternando visibilidad del modelo');
   }
 
   void _scaleModel() {
     // Escalar el modelo
+    debugPrint('Escalando modelo');
   }
 }
