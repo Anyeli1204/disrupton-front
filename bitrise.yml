@@ -33,7 +33,7 @@ workflows:
     - deploy-to-bitrise-io@2: {}
   primary:
     description: |
-      Builds project and runs tests with IPA generation.
+      Builds project and runs tests with IPA generation for iPhone.
 
       Next steps:
       - Check out [Getting started with Flutter apps](https://devcenter.bitrise.io/en/getting-started/getting-started-with-flutter-apps.html).
