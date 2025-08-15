@@ -12,9 +12,9 @@ dependencies:
   flutter:
     sdk: flutter
   
-  # Firebase
-  firebase_core: ^2.32.0
-  firebase_analytics: ^10.10.7
+  # Firebase (temporalmente comentado por conflicto con AR Flutter Plugin)
+  # firebase_core: ^2.32.0
+  # firebase_analytics: ^10.10.7
   
   # Realidad Aumentada
   ar_flutter_plugin: ^0.7.3
