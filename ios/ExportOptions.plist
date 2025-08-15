@@ -18,5 +18,10 @@
 	<true/>
 	<key>thinning</key>
 	<string>&lt;none&gt;</string>
+	<key>provisioningProfiles</key>
+	<dict>
+		<key>com.disrupton.app</key>
+		<string>iOS Team Provisioning Profile: com.disrupton.app</string>
+	</dict>
 </dict>
 </plist>

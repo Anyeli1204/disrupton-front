@@ -18,7 +18,7 @@
 ### 3. Archivos del Proyecto
 - [x] `GoogleService-Info.plist` en `frontend/ios/Runner/`
 - [x] `GoogleService-Info.plist` incluido en proyecto Xcode ✅
-- [x] `codemagic_firebase.yaml` creado
+- [x] `codemagic.yaml` actualizado con workflow Firebase ✅
 - [x] `ExportOptions.plist` en `frontend/ios/`
 - [x] Dependencias Firebase agregadas a `pubspec.yaml`
 - [x] Firebase inicializado en `main.dart`
@@ -40,7 +40,7 @@
 
 ## 🎉 ¡Todo está listo!
 
-Ya tienes toda la configuración completa. Solo falta ejecutar el build en Codemagic.
+Ya tienes toda la configuración completa. Ahora deberías ver el workflow `firebase-distribution` en Codemagic.
 
 ## ❓ ¿Necesitas Ayuda?
 

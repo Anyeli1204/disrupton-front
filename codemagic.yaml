@@ -25,13 +25,13 @@ workflows:
           pod deintegrate
           pod install
           cd ..
-          flutter build ipa --debug --no-tree-shake-icons
+          flutter build ipa --debug --no-tree-shake-icons --export-options-plist=ios/ExportOptions.plist
       - name: Upload to Firebase App Distribution
         script: |
           firebase appdistribution:distribute "build/ios/ipa/*.ipa" \
             --app $FIREBASE_APP_ID \
             --token $FIREBASE_TOKEN \
-            --groups "testers" \
+            --groups "tester" \
             --release-notes "Nueva versión de Disrupton App con mejoras en AR"
     artifacts:
       - build/ios/ipa/*.ipa
