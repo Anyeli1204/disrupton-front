@@ -55,6 +55,13 @@ workflows:
         - ios_output_type: archive
         - ios_additional_params: "--release --no-codesign"
         - ios_output_pattern: "*build/ios/archive/*.xcarchive"
+    - xcode-archive@4:
+        inputs:
+        - project_path: "$BITRISE_FLUTTER_PROJECT_LOCATION/ios/Runner.xcworkspace"
+        - scheme: "Runner"
+        - export_method: "development"
+        - export_options: "specify"
+        - export_options_path: "$BITRISE_FLUTTER_PROJECT_LOCATION/ios/ExportOptions.plist"
     - save-dart-cache@1: {}
     - deploy-to-bitrise-io@2: {}
     triggers:
