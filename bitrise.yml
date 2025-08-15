@@ -55,13 +55,34 @@ workflows:
         - ios_output_type: archive
         - ios_additional_params: "--release --no-codesign"
         - ios_output_pattern: "*build/ios/archive/*.xcarchive"
-    - xcode-archive@4:
+    - script@1:
+        title: "Convert to IPA"
         inputs:
-        - project_path: "$BITRISE_FLUTTER_PROJECT_LOCATION/ios/Runner.xcworkspace"
-        - scheme: "Runner"
-        - export_method: "development"
-        - export_options: "specify"
-        - export_options_path: "$BITRISE_FLUTTER_PROJECT_LOCATION/ios/ExportOptions.plist"
+        - script_content: |
+            #!/bin/bash
+            set -ex
+            
+            # Find the xcarchive file
+            XCARCHIVE_PATH=$(find build/ios/archive -name "*.xcarchive" | head -1)
+            
+            if [ -z "$XCARCHIVE_PATH" ]; then
+              echo "No xcarchive file found"
+              exit 1
+            fi
+            
+            echo "Found xcarchive: $XCARCHIVE_PATH"
+            
+            # Export to IPA
+            xcodebuild -exportArchive \
+              -archivePath "$XCARCHIVE_PATH" \
+              -exportPath build/ios/ipa \
+              -exportOptionsPlist ios/ExportOptions.plist
+            
+            # List generated files
+            ls -la build/ios/ipa/
+            
+            # Copy IPA to artifacts directory
+            cp build/ios/ipa/*.ipa $BITRISE_DEPLOY_DIR/
     - save-dart-cache@1: {}
     - deploy-to-bitrise-io@2: {}
     triggers:
