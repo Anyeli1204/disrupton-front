@@ -1,0 +1,38 @@
+workflows:
+  appetize-build:
+    name: Appetize Build
+    environment:
+      xcode: latest
+      flutter: stable
+      groups:
+        - variables
+      vars:
+        XCODE_PROJECT: "ios/Runner.xcworkspace"
+        XCODE_SCHEME: "Runner"
+        BUNDLE_ID: "com.disrupton.app"
+        APPETIZE_TOKEN: $APPETIZE_TOKEN
+    scripts:
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Build for Appetize
+        script: |
+          flutter clean
+          flutter pub get
+          cd ios
+          pod deintegrate
+          pod install
+          cd ..
+          flutter build ios --debug --no-tree-shake-icons
+      - name: Upload to Appetize
+        script: |
+          curl -X POST "https://api.appetize.io/v1/apps" \
+            -H "Content-Type: application/octet-stream" \
+            -H "X-API-Token: $APPETIZE_TOKEN" \
+            --data-binary "@build/ios/Debug-iphoneos/Runner.app" \
+            -d "platform=ios"
+    artifacts:
+      - build/ios/Debug-iphoneos/Runner.app
+    publishing:
+      email:
+        recipients:
+          - anyelitamara1@gmail.com

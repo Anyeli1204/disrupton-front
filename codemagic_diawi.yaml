@@ -1,0 +1,37 @@
+workflows:
+  diawi-distribution:
+    name: Diawi Distribution
+    environment:
+      xcode: latest
+      flutter: stable
+      groups:
+        - variables
+      vars:
+        XCODE_PROJECT: "ios/Runner.xcworkspace"
+        XCODE_SCHEME: "Runner"
+        BUNDLE_ID: "com.disrupton.app"
+        DIAWI_TOKEN: $DIAWI_TOKEN
+    scripts:
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Build for Diawi
+        script: |
+          flutter clean
+          flutter pub get
+          cd ios
+          pod deintegrate
+          pod install
+          cd ..
+          flutter build ios --debug --no-tree-shake-icons --simulator
+      - name: Upload to Diawi
+        script: |
+          curl https://upload.diawi.com/ \
+            -F token='$DIAWI_TOKEN' \
+            -F file='@build/ios/Debug-iphonesimulator/Runner.app' \
+            -F callback_emails='anyelitamara1@gmail.com'
+    artifacts:
+      - build/ios/Debug-iphonesimulator/*.app
+    publishing:
+      email:
+        recipients:
+          - anyelitamara1@gmail.com
