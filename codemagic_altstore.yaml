@@ -1,6 +1,6 @@
 workflows:
-  ios-build:
-    name: iOS Build Only
+  altstore-build:
+    name: AltStore Build
     environment:
       xcode: latest
       flutter: stable
@@ -15,7 +15,7 @@ workflows:
     scripts:
       - name: Get Flutter packages
         script: flutter pub get
-      - name: Clean and rebuild iOS
+      - name: Build for AltStore
         script: |
           flutter clean
           flutter pub get
@@ -23,7 +23,7 @@ workflows:
           pod deintegrate
           pod install
           cd ..
-          flutter build ipa --debug --no-tree-shake-icons
+          flutter build ipa --debug --no-tree-shake-icons --export-options-plist=ios/ExportOptions.plist
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
