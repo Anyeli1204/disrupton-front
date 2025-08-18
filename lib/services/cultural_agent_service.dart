@@ -1,21 +1,26 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../config/app_config.dart';
 import '../models/cultural_agent.dart';
+import 'auth_service.dart';
 
 class CulturalAgentService {
-  static const String baseUrl = 'http://localhost:8080'; // Cambiar por tu URL del backend
+  static const String baseUrl = AppConfig.baseUrl;
   
   // Obtener todos los agentes culturales
   static Future<List<CulturalAgent>> getAllAgents() async {
     try {
+      final authService = AuthService();
+      final headers = authService.getAuthHeaders();
       final response = await http.get(
-        Uri.parse('$baseUrl/api/cultural-agents'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('$baseUrl/api/collaborators'),
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        return data.map((json) => CulturalAgent.fromJson(json)).toList();
+        final Map<String, dynamic> responseBody = json.decode(response.body);
+        final List<dynamic> content = responseBody['content']; // Extrae la lista de 'content'
+        return content.map((json) => CulturalAgent.fromJson(json)).toList();
       } else {
         throw Exception('Error al obtener agentes culturales: ${response.statusCode}');
       }
@@ -27,9 +32,11 @@ class CulturalAgentService {
   // Obtener agente por ID
   static Future<CulturalAgent?> getAgentById(String id) async {
     try {
+      final authService = AuthService();
+      final headers = authService.getAuthHeaders();
       final response = await http.get(
-        Uri.parse('$baseUrl/api/cultural-agents/$id'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('$baseUrl/api/collaborators/$id'),
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
@@ -48,14 +55,17 @@ class CulturalAgentService {
   // Obtener agentes por categoría
   static Future<List<CulturalAgent>> getAgentsByCategory(String category) async {
     try {
+      final authService = AuthService();
+      final headers = authService.getAuthHeaders();
       final response = await http.get(
-        Uri.parse('$baseUrl/api/cultural-agents?category=$category'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('$baseUrl/api/collaborators?tipo=$category'),
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        return data.map((json) => CulturalAgent.fromJson(json)).toList();
+        final Map<String, dynamic> responseBody = json.decode(response.body);
+        final List<dynamic> content = responseBody['content'];
+        return content.map((json) => CulturalAgent.fromJson(json)).toList();
       } else {
         throw Exception('Error al obtener agentes por categoría: ${response.statusCode}');
       }
@@ -67,14 +77,17 @@ class CulturalAgentService {
   // Buscar agentes por texto
   static Future<List<CulturalAgent>> searchAgents(String query) async {
     try {
+      final authService = AuthService();
+      final headers = authService.getAuthHeaders();
       final response = await http.get(
-        Uri.parse('$baseUrl/api/cultural-agents/search?q=${Uri.encodeComponent(query)}'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('$baseUrl/api/collaborators?nombre=${Uri.encodeComponent(query)}'),
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        return data.map((json) => CulturalAgent.fromJson(json)).toList();
+        final Map<String, dynamic> responseBody = json.decode(response.body);
+        final List<dynamic> content = responseBody['content'];
+        return content.map((json) => CulturalAgent.fromJson(json)).toList();
       } else {
         throw Exception('Error al buscar agentes: ${response.statusCode}');
       }
@@ -86,14 +99,17 @@ class CulturalAgentService {
   // Obtener agentes por región
   static Future<List<CulturalAgent>> getAgentsByRegion(String region) async {
     try {
+      final authService = AuthService();
+      final headers = authService.getAuthHeaders();
       final response = await http.get(
-        Uri.parse('$baseUrl/api/cultural-agents?region=${Uri.encodeComponent(region)}'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('$baseUrl/api/collaborators?region=${Uri.encodeComponent(region)}'),
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        return data.map((json) => CulturalAgent.fromJson(json)).toList();
+        final Map<String, dynamic> responseBody = json.decode(response.body);
+        final List<dynamic> content = responseBody['content'];
+        return content.map((json) => CulturalAgent.fromJson(json)).toList();
       } else {
         throw Exception('Error al obtener agentes por región: ${response.statusCode}');
       }
@@ -105,9 +121,11 @@ class CulturalAgentService {
   // Crear nuevo agente cultural
   static Future<bool> createAgent(CulturalAgent agent) async {
     try {
+      final authService = AuthService();
+      final headers = authService.getAuthHeaders();
       final response = await http.post(
-        Uri.parse('$baseUrl/api/cultural-agents'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('$baseUrl/api/collaborators'),
+        headers: headers,
         body: json.encode(agent.toJson()),
       );
 
@@ -120,9 +138,11 @@ class CulturalAgentService {
   // Actualizar agente cultural
   static Future<bool> updateAgent(String id, CulturalAgent agent) async {
     try {
+      final authService = AuthService();
+      final headers = authService.getAuthHeaders();
       final response = await http.put(
-        Uri.parse('$baseUrl/api/cultural-agents/$id'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('$baseUrl/api/collaborators/$id'),
+        headers: headers,
         body: json.encode(agent.toJson()),
       );
 
@@ -135,9 +155,11 @@ class CulturalAgentService {
   // Eliminar agente cultural
   static Future<bool> deleteAgent(String id) async {
     try {
+      final authService = AuthService();
+      final headers = authService.getAuthHeaders();
       final response = await http.delete(
-        Uri.parse('$baseUrl/api/cultural-agents/$id'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('$baseUrl/api/collaborators/$id'),
+        headers: headers,
       );
 
       return response.statusCode == 200 || response.statusCode == 204;
@@ -149,9 +171,11 @@ class CulturalAgentService {
   // Calificar agente
   static Future<bool> rateAgent(String id, double rating, String userId) async {
     try {
+      final authService = AuthService();
+      final headers = authService.getAuthHeaders();
       final response = await http.post(
-        Uri.parse('$baseUrl/api/cultural-agents/$id/rate'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('$baseUrl/api/collaborators/$id/rate'),
+        headers: headers,
         body: json.encode({
           'rating': rating,
           'userId': userId,
@@ -165,17 +189,67 @@ class CulturalAgentService {
     }
   }
 
-  // Obtener agentes verificados
-  static Future<List<CulturalAgent>> getVerifiedAgents() async {
+  // Añadir un comentario a un agente
+  static Future<bool> addCommentToAgent(String agentId, String comment, double rating, String userId) async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/api/cultural-agents?verified=true'),
-        headers: {'Content-Type': 'application/json'},
+      final authService = AuthService();
+      final headers = authService.getAuthHeaders();
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/collaborators/$agentId/comments'),
+        headers: headers,
+        body: json.encode({
+          'comentario': comment,
+          'calificacion': rating,
+          'userId': userId,
+        }),
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      throw Exception('Error al añadir comentario: $e');
+    }
+  }
+
+  // Desbloquear un colaborador (simulación de pago)
+  static Future<bool> unlockCollaborator(String agentId, String userId, Map<String, String> authHeaders) async {
+    try {
+      final headers = {
+        'Content-Type': 'application/json',
+      }..addAll(authHeaders);
+
+      // El backend espera un cuerpo de solicitud, incluso si el token de pago es nulo.
+      final body = json.encode({'paymentToken': null});
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/collaborators/$agentId/unlock'),
+        headers: headers,
+        body: body, // Envía el cuerpo de la solicitud
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        return data.map((json) => CulturalAgent.fromJson(json)).toList();
+        return true;
+      } else {
+        throw Exception('Error al desbloquear: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Error de conexión al desbloquear: $e');
+    }
+  }
+
+  // Obtener agentes verificados
+  static Future<List<CulturalAgent>> getVerifiedAgents() async {
+    try {
+      final authService = AuthService();
+      final headers = authService.getAuthHeaders();
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/collaborators?verified=true'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseBody = json.decode(response.body);
+        final List<dynamic> content = responseBody['content']; // Extrae la lista de 'content'
+        return content.map((json) => CulturalAgent.fromJson(json)).toList();
       } else {
         throw Exception('Error al obtener agentes verificados: ${response.statusCode}');
       }

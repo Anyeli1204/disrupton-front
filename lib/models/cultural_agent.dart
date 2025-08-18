@@ -1,3 +1,5 @@
+import 'package:disrupton_app/models/destacado_comment.dart'; // Importar el nuevo modelo
+
 class CulturalAgent {
   final String id;
   final String name;
@@ -21,6 +23,11 @@ class CulturalAgent {
   final DateTime? lastUpdated;
   final String? userId;
   final Map<String, dynamic>? additionalInfo;
+  final bool? tieneAcceso; // Nuevo campo
+  final double? precioAcceso; // Nuevo campo
+  final List<String> imagenesGaleria; // Nuevo campo
+  final List<DestacadoComment> comentariosDestacados; // Nuevo campo
+  final Map<String, String>? redesContacto; // Nuevo campo
 
   CulturalAgent({
     required this.id,
@@ -45,14 +52,19 @@ class CulturalAgent {
     this.lastUpdated,
     this.userId,
     this.additionalInfo,
+    this.tieneAcceso,
+    this.precioAcceso,
+    this.imagenesGaleria = const [], // Inicializar
+    this.comentariosDestacados = const [], // Inicializar
+    this.redesContacto, // Inicializar
   });
 
   factory CulturalAgent.fromJson(Map<String, dynamic> json) {
     return CulturalAgent(
       id: json['id'] ?? json['collaboratorId'] ?? '',
       name: json['name'] ?? json['fullName'] ?? '',
-      description: json['description'] ?? json['bio'] ?? '',
-      category: json['category'] ?? json['type'] ?? 'CULTURAL_EXPERT',
+      description: json['descripcion'] ?? json['description'] ?? json['bio'] ?? '', // Mapear 'descripcion'
+      category: json['role'] ?? json['category'] ?? json['type'] ?? 'CULTURAL_EXPERT',
       imageUrl: json['imageUrl'] ?? json['profileImageUrl'],
       phoneNumber: json['phoneNumber'],
       email: json['email'],
@@ -71,14 +83,27 @@ class CulturalAgent {
       reviewCount: json['reviewCount'] ?? 0,
       isVerified: json['isVerified'] ?? false,
       isActive: json['isActive'] ?? true,
-      createdAt: json['createdAt'] != null 
-          ? DateTime.parse(json['createdAt'].toString())
+      createdAt: json['createdAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['createdAt']['seconds'] * 1000)
           : DateTime.now(),
-      lastUpdated: json['lastUpdated'] != null 
-          ? DateTime.parse(json['lastUpdated'].toString())
+      lastUpdated: json['lastUpdated'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['lastUpdated']['seconds'] * 1000)
           : null,
       userId: json['userId'] ?? json['createdBy'],
       additionalInfo: json['additionalInfo'],
+      tieneAcceso: json['tieneAcceso'],
+      precioAcceso: json['precioAcceso']?.toDouble(),
+      imagenesGaleria: json['imagenesGaleria'] != null
+          ? List<String>.from(json['imagenesGaleria'])
+          : [],
+      comentariosDestacados: json['comentariosDestacados'] != null
+          ? (json['comentariosDestacados'] as List)
+              .map((e) => DestacadoComment.fromJson(e))
+              .toList()
+          : [],
+      redesContacto: json['redesContacto'] != null
+          ? Map<String, String>.from(json['redesContacto'])
+          : null,
     );
   }
 
@@ -106,6 +131,11 @@ class CulturalAgent {
       'lastUpdated': lastUpdated?.toIso8601String(),
       'userId': userId,
       'additionalInfo': additionalInfo,
+      'tieneAcceso': tieneAcceso,
+      'precioAcceso': precioAcceso,
+      'imagenesGaleria': imagenesGaleria,
+      'comentariosDestacados': comentariosDestacados.map((e) => e.toJson()).toList(),
+      'redesContacto': redesContacto,
     };
   }
 
@@ -132,6 +162,11 @@ class CulturalAgent {
     DateTime? lastUpdated,
     String? userId,
     Map<String, dynamic>? additionalInfo,
+    bool? tieneAcceso,
+    double? precioAcceso,
+    List<String>? imagenesGaleria,
+    List<DestacadoComment>? comentariosDestacados,
+    Map<String, String>? redesContacto,
   }) {
     return CulturalAgent(
       id: id ?? this.id,
@@ -156,7 +191,11 @@ class CulturalAgent {
       lastUpdated: lastUpdated ?? this.lastUpdated,
       userId: userId ?? this.userId,
       additionalInfo: additionalInfo ?? this.additionalInfo,
+      tieneAcceso: tieneAcceso ?? this.tieneAcceso,
+      precioAcceso: precioAcceso ?? this.precioAcceso,
+      imagenesGaleria: imagenesGaleria ?? this.imagenesGaleria,
+      comentariosDestacados: comentariosDestacados ?? this.comentariosDestacados,
+      redesContacto: redesContacto ?? this.redesContacto,
     );
   }
 }
-

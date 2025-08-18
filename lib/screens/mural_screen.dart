@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/mural_question.dart';
 import '../models/comment.dart';
 import '../services/mural_service.dart';
+import '../providers/auth_provider.dart'; // Para obtener el usuario actual
 
 class MuralScreen extends StatefulWidget {
   const MuralScreen({super.key});
@@ -557,41 +559,63 @@ class _MuralScreenState extends State<MuralScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-  if (commentController.text.trim().isNotEmpty) {
-    // Guardamos las referencias a la UI ANTES del await.
-    final navigator = Navigator.of(context);
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final commentText = commentController.text.trim();
+              if (commentController.text.trim().isEmpty) return;
 
-    // Llama a la función asíncrona. Esta es la brecha.
-    final success = await _addComment(
-      commentText,
-      question.id,
-    );
+              // Desactivar el botón para evitar múltiples envíos
+              setState(() {});
 
-    // SOLUCIÓN: Verifica si el widget todavía está montado DESPUÉS del await.
-    if (!mounted) return;
+              final navigator = Navigator.of(context);
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+              final authProvider = Provider.of<AuthProvider>(context, listen: false);
+              final user = authProvider.currentUser;
 
-    // Ahora es seguro usar las referencias guardadas.
-    if (success) {
-      _addCommentLocally(commentText, question.id);
-      navigator.pop(); // Cierra el diálogo
-      scaffoldMessenger.showSnackBar(
-        const SnackBar(
-          content: Text('Comentario publicado exitosamente'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } else {
-      scaffoldMessenger.showSnackBar(
-        const SnackBar(
-          content: Text('Error al publicar el comentario'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-},
+              if (user == null) {
+                scaffoldMessenger.showSnackBar(
+                  const SnackBar(
+                    content: Text('Debes iniciar sesión para comentar'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+
+              try {
+                final authHeaders = authProvider.getAuthHeaders();
+                final newComment = await MuralService.createMuralComment(
+                  commentController.text.trim(),
+                  user.userId, // Pasa el ID del usuario actual
+                  authHeaders,
+                  questionId: question.id,
+                );
+
+                if (mounted && newComment != null) {
+                  setState(() {
+                    _comments.insert(0, newComment);
+                  });
+                  navigator.pop();
+                  scaffoldMessenger.showSnackBar(
+                    const SnackBar(
+                      content: Text('Comentario publicado exitosamente'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  scaffoldMessenger.showSnackBar(
+                    SnackBar(
+                      content: Text('Error al publicar: ${e.toString()}'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              } finally {
+                // Reactivar el botón
+                if (mounted) {
+                  setState(() {});
+                }
+              }
+            },
             child: const Text('Publicar'),
           ),
         ],
@@ -599,59 +623,97 @@ class _MuralScreenState extends State<MuralScreen> {
     );
   }
 
-Future<bool> _addComment(String text, String questionId) async {
-  try {
-    // Simplemente llama al servicio y devuelve el resultado.
-    final success = await MuralService.createMuralComment(
-      text,
-      objectId: questionId,
-    );
-    return success;
-  } catch (e) {
-    // Si hay un error, puedes imprimirlo para depuración.
-    // El manejo del error en la UI se hará en otro lado.
-    debugPrint('Error al añadir comentario: $e');
-    return false;
-  }
-}
 
-  // Método para agregar comentario localmente sin usar BuildContext
-  void _addCommentLocally(String text, String questionId) {
-    final newComment = Comment(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      text: text,
-      userId: 'currentUser', // Usuario actual (se puede obtener de un provider)
-      userName: 'Usuario Actual',
-      userProfileImage: null,
-      objectId: questionId,
-      createdAt: DateTime.now(),
-      likes: const [], // Lista vacía de IDs de usuarios que dieron like
-      dislikes: const [], // Lista vacía de IDs de usuarios que dieron dislike
-    );
+  void _handleLike(Comment comment) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final user = authProvider.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Debes iniciar sesión para reaccionar')),
+      );
+      return;
+    }
+
+    final userId = user.userId;
+    final isLiked = comment.isLikedBy(userId);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
     
+    // Actualización optimista de la UI
     setState(() {
-      _comments.insert(0, newComment);
+      if (isLiked) {
+        comment.likes.remove(userId);
+      } else {
+        comment.likes.add(userId);
+        // Si estaba en dislike, se quita
+        comment.dislikes.remove(userId);
+      }
     });
+
+    try {
+      if (isLiked) {
+        await MuralService.unlikeComment(comment.id, userId);
+      } else {
+        await MuralService.likeComment(comment.id, userId);
+      }
+    } catch (e) {
+      // Si falla, revertir el cambio en la UI
+      setState(() {
+        if (isLiked) {
+          comment.likes.add(userId);
+        } else {
+          comment.likes.remove(userId);
+        }
+      });
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text('Error al procesar el like: $e')),
+      );
+    }
   }
 
-  void _handleLike(Comment comment) {
-    // Implementar lógica de like
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Función de like en desarrollo'),
-        backgroundColor: Colors.blue,
-      ),
-    );
-  }
+  void _handleDislike(Comment comment) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final user = authProvider.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Debes iniciar sesión para reaccionar')),
+      );
+      return;
+    }
 
-  void _handleDislike(Comment comment) {
-    // Implementar lógica de dislike
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Función de dislike en desarrollo'),
-        backgroundColor: Colors.blue,
-      ),
-    );
+    final userId = user.userId;
+    final isDisliked = comment.isDislikedBy(userId);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    // Actualización optimista de la UI
+    setState(() {
+      if (isDisliked) {
+        comment.dislikes.remove(userId);
+      } else {
+        comment.dislikes.add(userId);
+        // Si estaba en like, se quita
+        comment.likes.remove(userId);
+      }
+    });
+
+    try {
+      if (isDisliked) {
+        await MuralService.undislikeComment(comment.id, userId);
+      } else {
+        await MuralService.dislikeComment(comment.id, userId);
+      }
+    } catch (e) {
+      // Si falla, revertir el cambio en la UI
+      setState(() {
+        if (isDisliked) {
+          comment.dislikes.add(userId);
+        } else {
+          comment.dislikes.remove(userId);
+        }
+      });
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text('Error al procesar el dislike: $e')),
+      );
+    }
   }
 
   void _handleReply(Comment comment) {

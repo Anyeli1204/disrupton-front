@@ -1,17 +1,28 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../config/app_config.dart';
 import '../models/comment.dart';
 import '../models/mural_question.dart';
+import 'auth_service.dart';
 
 class MuralService {
-  static const String baseUrl = 'http://localhost:8080'; // Cambiar por tu URL del backend
+  static const String baseUrl = AppConfig.baseUrl;
   
   // Obtener comentarios del mural
   static Future<List<Comment>> getMuralComments() async {
     try {
+      final activeQuestion = await getActiveMuralQuestion();
+      if (activeQuestion == null) {
+        // Si no hay pregunta activa, devolver una lista vacía o manejar como se prefiera
+        return [];
+      }
+
+      final authService = AuthService();
+      final headers = authService.getAuthHeaders();
+      
       final response = await http.get(
-        Uri.parse('$baseUrl/api/mural/comments'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('$baseUrl/api/mural/comentarios/${activeQuestion.id}'),
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
@@ -21,35 +32,74 @@ class MuralService {
         throw Exception('Error al obtener comentarios: ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception('Error de conexión: $e');
+      // Si hay error, usar datos de ejemplo
+      return getSampleComments();
+    }
+  }
+
+  // Obtener la pregunta activa del mural
+  static Future<MuralQuestion?> getActiveMuralQuestion() async {
+    try {
+      final authService = AuthService();
+      final headers = authService.getAuthHeaders();
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/mural/active'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return MuralQuestion.fromJson(data);
+      } else if (response.statusCode == 204) { // No Content
+        return null;
+      } else {
+        throw Exception('Error al obtener la pregunta activa: ${response.statusCode}');
+      }
+    } catch (e) {
+      // En caso de error, se puede devolver null o manejarlo de otra forma
+      return null;
     }
   }
 
   // Crear comentario en el mural
-  static Future<bool> createMuralComment(String text, {String? objectId}) async {
+  static Future<Comment?> createMuralComment(String text, String userId, Map<String, String> authHeaders, {String? questionId}) async {
     try {
+      final headers = {
+        'Content-Type': 'application/json',
+      }..addAll(authHeaders);
+
       final response = await http.post(
-        Uri.parse('$baseUrl/api/mural/comments'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('$baseUrl/api/mural/comentarios'), // Endpoint corregido
+        headers: headers,
         body: json.encode({
           'text': text,
-          'objectId': objectId,
-          'createdAt': DateTime.now().toIso8601String(),
+          'userId': userId,
+          'preguntaId': questionId, // El backend espera 'preguntaId'
         }),
       );
 
-      return response.statusCode == 200 || response.statusCode == 201;
+      if (response.statusCode == 200 || response.statusCode == 201) { // El backend devuelve 200 OK
+        // Si el backend devuelve el comentario creado, lo parseamos y lo retornamos
+        final data = json.decode(response.body);
+        return Comment.fromJson(data);
+      } else {
+        // Si hay un error en el servidor, lanzamos una excepción
+        throw Exception('Error al crear el comentario: ${response.body}');
+      }
     } catch (e) {
-      throw Exception('Error al crear comentario: $e');
+      // Si hay un error de conexión o de otro tipo, lo relanzamos
+      throw Exception('Error de conexión al crear comentario: $e');
     }
   }
 
   // Obtener comentarios por objeto cultural
   static Future<List<Comment>> getCommentsByObject(String objectId) async {
     try {
+      final authService = AuthService();
+      final headers = authService.getAuthHeaders();
       final response = await http.get(
         Uri.parse('$baseUrl/api/mural/comments?objectId=$objectId'),
-        headers: {'Content-Type': 'application/json'},
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
@@ -66,9 +116,11 @@ class MuralService {
   // Obtener comentarios por usuario
   static Future<List<Comment>> getCommentsByUser(String userId) async {
     try {
+      final authService = AuthService();
+      final headers = authService.getAuthHeaders();
       final response = await http.get(
         Uri.parse('$baseUrl/api/mural/comments?userId=$userId'),
-        headers: {'Content-Type': 'application/json'},
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
@@ -85,9 +137,11 @@ class MuralService {
   // Dar like a un comentario
   static Future<bool> likeComment(String commentId, String userId) async {
     try {
+      final authService = AuthService();
+      final headers = authService.getAuthHeaders();
       final response = await http.post(
         Uri.parse('$baseUrl/api/mural/comments/$commentId/like'),
-        headers: {'Content-Type': 'application/json'},
+        headers: headers,
         body: json.encode({
           'userId': userId,
           'timestamp': DateTime.now().toIso8601String(),
@@ -103,14 +157,50 @@ class MuralService {
   // Quitar like de un comentario
   static Future<bool> unlikeComment(String commentId, String userId) async {
     try {
+      final authService = AuthService();
+      final headers = authService.getAuthHeaders();
       final response = await http.delete(
         Uri.parse('$baseUrl/api/mural/comments/$commentId/like/$userId'),
-        headers: {'Content-Type': 'application/json'},
+        headers: headers,
       );
 
       return response.statusCode == 200;
     } catch (e) {
       throw Exception('Error al quitar like: $e');
+    }
+  }
+
+  // Dar dislike a un comentario
+  static Future<bool> dislikeComment(String commentId, String userId) async {
+    try {
+      final authService = AuthService();
+      final headers = authService.getAuthHeaders();
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/mural/comments/$commentId/dislike'),
+        headers: headers,
+        body: json.encode({
+          'userId': userId,
+          'timestamp': DateTime.now().toIso8601String(),
+        }),
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      throw Exception('Error al dar dislike: $e');
+    }
+  }
+
+  // Quitar dislike de un comentario
+  static Future<bool> undislikeComment(String commentId, String userId) async {
+    try {
+      final authService = AuthService();
+      final headers = authService.getAuthHeaders();
+      final response = await http.delete(
+        Uri.parse('$baseUrl/api/mural/comments/$commentId/dislike/$userId'),
+        headers: headers,
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      throw Exception('Error al quitar dislike: $e');
     }
   }
 
@@ -198,4 +288,3 @@ class MuralService {
     ];
   }
 }
-

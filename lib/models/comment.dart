@@ -46,11 +46,11 @@ class Comment {
       dislikes: json['dislikes'] != null 
           ? List<String>.from(json['dislikes'])
           : [],
-      createdAt: json['createdAt'] != null 
-          ? DateTime.parse(json['createdAt'].toString())
+      createdAt: json['createdAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['createdAt']['seconds'] * 1000)
           : DateTime.now(),
-      updatedAt: json['updatedAt'] != null 
-          ? DateTime.parse(json['updatedAt'].toString())
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['updatedAt']['seconds'] * 1000)
           : null,
       isEdited: json['isEdited'] ?? false,
       isDeleted: json['isDeleted'] ?? false,
@@ -118,4 +118,3 @@ class Comment {
   bool isLikedBy(String userId) => likes.contains(userId);
   bool isDislikedBy(String userId) => dislikes.isNotEmpty && dislikes.contains(userId);
 }
-

@@ -1,15 +1,16 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../config/app_config.dart';
 import '../models/pieza.dart';
 
 class PiezaService {
-  static const String baseUrl = 'https://api.disrupton.com'; // Cambiar por tu URL real
+  static const String baseUrl = AppConfig.baseUrl;
   
   // Obtener todas las piezas
   static Future<List<Pieza>> obtenerPiezas() async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/piezas'),
+        Uri.parse('$baseUrl/api/cultural-objects'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -28,7 +29,7 @@ class PiezaService {
   static Future<Pieza> obtenerPiezaPorId(String id) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/piezas/$id'),
+        Uri.parse('$baseUrl/api/cultural-objects/$id'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -47,7 +48,7 @@ class PiezaService {
   static Future<List<Pieza>> obtenerPiezasPorCategoria(String categoria) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/piezas?categoria=$categoria'),
+        Uri.parse('$baseUrl/api/cultural-objects/type/$categoria'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -66,7 +67,7 @@ class PiezaService {
   static Future<List<Pieza>> obtenerPiezasPorUbicacion(String ubicacion) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/piezas?ubicacion=$ubicacion'),
+        Uri.parse('$baseUrl/api/cultural-objects/region/$ubicacion'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -108,7 +109,7 @@ class PiezaService {
   static Future<List<Pieza>> buscarPiezas(String query) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/piezas/buscar?q=${Uri.encodeComponent(query)}'),
+        Uri.parse('$baseUrl/api/cultural-objects/search?query=${Uri.encodeComponent(query)}'),
         headers: {'Content-Type': 'application/json'},
       );
 
