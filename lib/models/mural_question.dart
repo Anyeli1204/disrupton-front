@@ -13,6 +13,7 @@ class MuralQuestion {
   final DateTime createdAt;
   final DateTime? updatedAt;
   final Map<String, dynamic>? metadata;
+  final List<String>? imagenes;
 
   MuralQuestion({
     required this.id,
@@ -29,19 +30,20 @@ class MuralQuestion {
     required this.createdAt,
     this.updatedAt,
     this.metadata,
+    this.imagenes,
   });
 
   factory MuralQuestion.fromJson(Map<String, dynamic> json) {
     return MuralQuestion(
       id: json['id'] ?? '',
-      question: json['question'] ?? '',
+      question: json['content'] ?? json['question'] ?? '',
       description: json['description'],
       category: json['category'] ?? 'general',
       startDate: json['startDate'] != null 
-          ? DateTime.parse(json['startDate'].toString())
+          ? _parseFirestoreTimestamp(json['startDate'])
           : DateTime.now(),
       endDate: json['endDate'] != null 
-          ? DateTime.parse(json['endDate'].toString())
+          ? _parseFirestoreTimestamp(json['endDate'])
           : DateTime.now().add(const Duration(days: 7)),
       isActive: json['isActive'] ?? true,
       tags: json['tags'] != null 
@@ -57,6 +59,9 @@ class MuralQuestion {
           ? DateTime.parse(json['updatedAt'].toString())
           : null,
       metadata: json['metadata'],
+      imagenes: json['imagenes'] != null 
+          ? List<String>.from(json['imagenes'])
+          : null,
     );
   }
 
@@ -125,6 +130,18 @@ class MuralQuestion {
     final hours = remaining.inHours % 24;
     if (days > 0) return '$days días, $hours horas';
     return '$hours horas';
+  }
+
+  // Helper method para parsear Firestore Timestamp
+  static DateTime _parseFirestoreTimestamp(dynamic timestamp) {
+    if (timestamp is Map<String, dynamic>) {
+      final seconds = timestamp['seconds'] as int?;
+      final nanos = timestamp['nanos'] as int?;
+      if (seconds != null) {
+        return DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
+      }
+    }
+    return DateTime.now();
   }
 }
 

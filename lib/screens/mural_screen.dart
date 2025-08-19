@@ -29,11 +29,17 @@ class _MuralScreenState extends State<MuralScreen> {
     });
 
     try {
-      // Intentar cargar desde el backend
+      // Cargar pregunta activa del backend
+      final activeQuestion = await MuralService.getActiveMuralQuestion();
       final comments = await MuralService.getMuralComments();
+      
       setState(() {
         _comments = comments;
-        _questions = MuralService.getSampleQuestions();
+        if (activeQuestion != null) {
+          _questions = [activeQuestion];
+        } else {
+          _questions = MuralService.getSampleQuestions();
+        }
         _isLoading = false;
       });
     } catch (e) {
@@ -202,6 +208,64 @@ class _MuralScreenState extends State<MuralScreen> {
                   
                   const SizedBox(height: 20),
                   
+                  // Imágenes de la pregunta
+                  if (currentQuestion.imagenes != null && currentQuestion.imagenes!.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      height: 200,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: currentQuestion.imagenes!.length,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            margin: const EdgeInsets.only(right: 12),
+                            width: 200,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(
+                                currentQuestion.imagenes![index],
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    color: Colors.grey[300],
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.image_not_supported,
+                                        color: Colors.grey,
+                                        size: 48,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return Container(
+                                    color: Colors.grey[200],
+                                    child: const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                  
+                  const SizedBox(height: 20),
+                  
                   // Información adicional
                   Row(
                     children: [
@@ -218,7 +282,7 @@ class _MuralScreenState extends State<MuralScreen> {
                       Icon(Icons.chat_bubble, size: 16, color: Colors.grey[600]),
                       const SizedBox(width: 8),
                       Text(
-                        '${currentQuestion.commentCount} comentarios',
+                        '${_comments.length} comentarios',
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 14,
@@ -586,6 +650,7 @@ class _MuralScreenState extends State<MuralScreen> {
                   user.userId, // Pasa el ID del usuario actual
                   authHeaders,
                   questionId: question.id,
+                  user: user,
                 );
 
                 if (mounted && newComment != null) {

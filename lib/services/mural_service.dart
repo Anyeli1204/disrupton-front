@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../config/app_config.dart';
 import '../models/comment.dart';
 import '../models/mural_question.dart';
+import '../models/user.dart';
 import 'auth_service.dart';
 
 class MuralService {
@@ -62,7 +63,7 @@ class MuralService {
   }
 
   // Crear comentario en el mural
-  static Future<Comment?> createMuralComment(String text, String userId, Map<String, String> authHeaders, {String? questionId}) async {
+  static Future<Comment?> createMuralComment(String text, String userId, Map<String, String> authHeaders, {String? questionId, User? user}) async {
     try {
       final headers = {
         'Content-Type': 'application/json',
@@ -79,9 +80,42 @@ class MuralService {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) { // El backend devuelve 200 OK
-        // Si el backend devuelve el comentario creado, lo parseamos y lo retornamos
         final data = json.decode(response.body);
-        return Comment.fromJson(data);
+        
+        // El backend devuelve un objeto con información de moderación
+        if (data['aprobado'] == true) {
+          // Si fue aprobado, usar los datos del comentario guardado
+          final commentData = data['commentData'];
+          if (commentData != null) {
+            return Comment(
+              id: commentData['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
+              text: commentData['text'] ?? text,
+              userId: commentData['userId'] ?? userId,
+              userName: user?.name ?? 'Usuario',
+              createdAt: commentData['createdAt'] != null 
+                  ? DateTime.parse(commentData['createdAt'].toString())
+                  : DateTime.now(),
+              likes: [],
+              dislikes: [],
+              isEdited: false,
+            );
+          } else {
+            // Fallback si no hay commentData
+            return Comment(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              text: text,
+              userId: userId,
+              userName: user?.name ?? 'Usuario',
+              createdAt: DateTime.now(),
+              likes: [],
+              dislikes: [],
+              isEdited: false,
+            );
+          }
+        } else {
+          // Comentario rechazado por moderación
+          throw Exception('Comentario rechazado: ${data['motivo'] ?? 'Contenido inapropiado'}');
+        }
       } else {
         // Si hay un error en el servidor, lanzamos una excepción
         throw Exception('Error al crear el comentario: ${response.body}');
