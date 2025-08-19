@@ -97,9 +97,9 @@ class _HomeScreenState extends State<HomeScreen> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 1.1,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              childAspectRatio: 1.6, // Aumentar aún más el ratio
               children: [
                 _buildFeatureCard(
                   icon: Icons.view_in_ar,
@@ -197,37 +197,39 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(8), // Reducir aún más el padding
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(6), // Reducir aún más el padding del icono
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 child: Icon(
                   icon,
-                  size: 32,
+                  size: 20, // Reducir aún más el tamaño del icono
                   color: color,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 6), // Reducir aún más el espaciado
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 12, // Reducir aún más el tamaño de fuente
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
                 textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 2), // Reducir aún más el espaciado
               Text(
                 subtitle,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 9, // Reducir aún más el tamaño de fuente
                   color: Colors.grey[600],
                 ),
                 textAlign: TextAlign.center,

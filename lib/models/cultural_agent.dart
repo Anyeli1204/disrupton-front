@@ -1,10 +1,9 @@
-import 'package:disrupton_app/models/destacado_comment.dart'; // Importar el nuevo modelo
 
 class CulturalAgent {
   final String id;
   final String name;
   final String description;
-  final String category; // ARTISAN, GUIDE, CULTURAL_EXPERT
+  final String category; // ARTISAN, GUIDE
   final String? imageUrl;
   final String? phoneNumber;
   final String? email;
@@ -26,7 +25,6 @@ class CulturalAgent {
   final bool? tieneAcceso; // Nuevo campo
   final double? precioAcceso; // Nuevo campo
   final List<String> imagenesGaleria; // Nuevo campo
-  final List<DestacadoComment> comentariosDestacados; // Nuevo campo
   final Map<String, String>? redesContacto; // Nuevo campo
 
   CulturalAgent({
@@ -55,7 +53,6 @@ class CulturalAgent {
     this.tieneAcceso,
     this.precioAcceso,
     this.imagenesGaleria = const [], // Inicializar
-    this.comentariosDestacados = const [], // Inicializar
     this.redesContacto, // Inicializar
   });
 
@@ -64,7 +61,7 @@ class CulturalAgent {
       id: json['id'] ?? json['collaboratorId'] ?? '',
       name: json['name'] ?? json['fullName'] ?? '',
       description: json['descripcion'] ?? json['description'] ?? json['bio'] ?? '', // Mapear 'descripcion'
-      category: json['role'] ?? json['category'] ?? json['type'] ?? 'CULTURAL_EXPERT',
+      category: json['role'] ?? json['category'] ?? json['type'] ?? 'GUIDE',
       imageUrl: json['imageUrl'] ?? json['profileImageUrl'],
       phoneNumber: json['phoneNumber'],
       email: json['email'],
@@ -79,8 +76,8 @@ class CulturalAgent {
       languages: json['languages'] != null 
           ? List<String>.from(json['languages'])
           : [],
-      rating: json['rating']?.toDouble(),
-      reviewCount: json['reviewCount'] ?? 0,
+      rating: json['calificacion']?.toDouble() ?? json['rating']?.toDouble(),
+      reviewCount: json['numeroResenas'] ?? json['reviewCount'] ?? 0,
       isVerified: json['isVerified'] ?? false,
       isActive: json['isActive'] ?? true,
       createdAt: json['createdAt'] != null
@@ -95,11 +92,6 @@ class CulturalAgent {
       precioAcceso: json['precioAcceso']?.toDouble(),
       imagenesGaleria: json['imagenesGaleria'] != null
           ? List<String>.from(json['imagenesGaleria'])
-          : [],
-      comentariosDestacados: json['comentariosDestacados'] != null
-          ? (json['comentariosDestacados'] as List)
-              .map((e) => DestacadoComment.fromJson(e))
-              .toList()
           : [],
       redesContacto: json['redesContacto'] != null
           ? Map<String, String>.from(json['redesContacto'])
@@ -134,7 +126,6 @@ class CulturalAgent {
       'tieneAcceso': tieneAcceso,
       'precioAcceso': precioAcceso,
       'imagenesGaleria': imagenesGaleria,
-      'comentariosDestacados': comentariosDestacados.map((e) => e.toJson()).toList(),
       'redesContacto': redesContacto,
     };
   }
@@ -165,7 +156,6 @@ class CulturalAgent {
     bool? tieneAcceso,
     double? precioAcceso,
     List<String>? imagenesGaleria,
-    List<DestacadoComment>? comentariosDestacados,
     Map<String, String>? redesContacto,
   }) {
     return CulturalAgent(
@@ -194,7 +184,6 @@ class CulturalAgent {
       tieneAcceso: tieneAcceso ?? this.tieneAcceso,
       precioAcceso: precioAcceso ?? this.precioAcceso,
       imagenesGaleria: imagenesGaleria ?? this.imagenesGaleria,
-      comentariosDestacados: comentariosDestacados ?? this.comentariosDestacados,
       redesContacto: redesContacto ?? this.redesContacto,
     );
   }

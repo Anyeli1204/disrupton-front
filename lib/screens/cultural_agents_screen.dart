@@ -22,7 +22,6 @@ class _CulturalAgentsScreenState extends State<CulturalAgentsScreen> {
     'TODAS',
     'ARTISAN',
     'GUIDE',
-    'CULTURAL_EXPERT',
   ];
 
   final List<String> _regions = [
@@ -60,31 +59,32 @@ class _CulturalAgentsScreenState extends State<CulturalAgentsScreen> {
   }
 
   Future<void> _loadAgents() async {
+    if (!mounted) return;
+    
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // Intentar cargar desde el backend
       final agents = await CulturalAgentService.getAllAgents();
+      if (!mounted) return;
+      
       setState(() {
         _allAgents = agents;
         _filteredAgents = agents;
         _isLoading = false;
       });
     } catch (e) {
-      // Si falla, usar datos de ejemplo
+      if (!mounted) return;
+      
       setState(() {
-        _allAgents = CulturalAgentService.getSampleAgents();
-        _filteredAgents = _allAgents;
         _isLoading = false;
       });
-      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Usando datos de ejemplo: $e'),
-            backgroundColor: Colors.orange,
+            content: Text('Error al cargar agentes: $e'),
+            backgroundColor: Colors.red,
           ),
         );
       }
@@ -430,10 +430,22 @@ class _CulturalAgentsScreenState extends State<CulturalAgentsScreen> {
         return 'Artesano';
       case 'GUIDE':
         return 'Guía Local';
-      case 'CULTURAL_EXPERT':
-        return 'Experto Cultural';
       default:
         return category;
+    }
+  }
+
+  String _formatDate(dynamic fecha) {
+    if (fecha == null) return 'Fecha no disponible';
+    
+    try {
+      if (fecha is Map && fecha['seconds'] != null) {
+        final date = DateTime.fromMillisecondsSinceEpoch(fecha['seconds'] * 1000);
+        return '${date.day}/${date.month}/${date.year}';
+      }
+      return fecha.toString().split(' ')[0];
+    } catch (e) {
+      return 'Fecha no disponible';
     }
   }
 
@@ -524,7 +536,7 @@ class _CulturalAgentsScreenState extends State<CulturalAgentsScreen> {
                 );
 
                 if (success) {
-                  _loadAgents(); // Recargar agentes para ver el nuevo comentario
+                  await _loadAgents(); // Recargar agentes para ver el nuevo comentario
                   navigator.pop();
                   scaffoldMessenger.showSnackBar(
                     const SnackBar(
@@ -532,6 +544,10 @@ class _CulturalAgentsScreenState extends State<CulturalAgentsScreen> {
                       backgroundColor: Colors.green,
                     ),
                   );
+                  // Forzar reconstrucción del widget para mostrar comentarios actualizados
+                  if (mounted) {
+                    setState(() {});
+                  }
                 } else {
                   scaffoldMessenger.showSnackBar(
                     const SnackBar(
@@ -693,21 +709,64 @@ class _CulturalAgentsScreenState extends State<CulturalAgentsScreen> {
                   
                   const SizedBox(height: 24),
 
-                  // Comentarios Destacados
-                  if (agent.comentariosDestacados.isNotEmpty) ...[
-                    const Text(
-                      'Comentarios Destacados',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  // Comentarios y Reseñas
+                  const Text(
+                    'Reseñas y Comentarios',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(height: 16),
-                    Column(
-                      children: agent.comentariosDestacados.map((comment) {
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          elevation: 1,
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Mostrar calificación y número de reseñas
+                  Row(
+                    children: [
+                      Icon(Icons.star, color: Colors.amber, size: 20),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${agent.rating?.toStringAsFixed(1) ?? '0.0'}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '(${agent.reviewCount} reseñas)',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Cargar comentarios dinámicamente
+                  FutureBuilder<List<Map<String, dynamic>>>(
+                    future: CulturalAgentService.getCollaboratorComments(agent.id),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      
+                      if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Text(
+                          'No hay comentarios disponibles',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                        );
+                      }
+                      
+                      final comments = snapshot.data!;
+                      return Column(
+                        children: comments.take(3).map((comment) { // Mostrar solo los primeros 3
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            elevation: 1,
                           color: Colors.grey[50],
                           child: Padding(
                             padding: const EdgeInsets.all(12.0),
@@ -717,7 +776,7 @@ class _CulturalAgentsScreenState extends State<CulturalAgentsScreen> {
                                 Row(
                                   children: [
                                     Text(
-                                      comment.usuarioNombre,
+                                      comment['usuarioNombre'] ?? 'Usuario',
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 15,
@@ -729,7 +788,7 @@ class _CulturalAgentsScreenState extends State<CulturalAgentsScreen> {
                                         const Icon(Icons.star, color: Colors.amber, size: 16),
                                         const SizedBox(width: 4),
                                         Text(
-                                          comment.calificacion.toStringAsFixed(1),
+                                          (comment['calificacion'] ?? 0.0).toStringAsFixed(1),
                                           style: const TextStyle(fontSize: 14),
                                         ),
                                       ],
@@ -738,12 +797,12 @@ class _CulturalAgentsScreenState extends State<CulturalAgentsScreen> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  comment.comentario,
+                                  comment['comentario'] ?? '',
                                   style: const TextStyle(fontSize: 14),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Fecha: ${comment.fecha.toLocal().toString().split(' ')[0]}',
+                                  'Fecha: ${_formatDate(comment['fecha'])}',
                                   style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                                 ),
                               ],
@@ -751,9 +810,10 @@ class _CulturalAgentsScreenState extends State<CulturalAgentsScreen> {
                           ),
                         );
                       }).toList(),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
+                    );
+                    },
+                  ),
+                  const SizedBox(height: 24),
                   
                   // Información de contacto (condicional)
                   _buildContactSection(agent),

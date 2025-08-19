@@ -210,6 +210,27 @@ class CulturalAgentService {
     }
   }
 
+  // Obtener comentarios de un colaborador
+  static Future<List<Map<String, dynamic>>> getCollaboratorComments(String collaboratorId) async {
+    try {
+      final authService = AuthService();
+      final headers = authService.getAuthHeaders();
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/collaborators/$collaboratorId/comments'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> comments = json.decode(response.body);
+        return comments.cast<Map<String, dynamic>>();
+      } else {
+        throw Exception('Error al obtener comentarios: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error de conexión: $e');
+    }
+  }
+
   // Desbloquear un colaborador (simulación de pago)
   static Future<bool> unlockCollaborator(String agentId, String userId, Map<String, String> authHeaders) async {
     try {
@@ -311,7 +332,7 @@ class CulturalAgentService {
         id: '3',
         name: 'Ana Rodríguez',
         description: 'Experta en flamenco y danza española. Profesora de baile con amplia experiencia en la enseñanza de técnicas tradicionales y modernas del flamenco.',
-        category: 'CULTURAL_EXPERT',
+        category: 'GUIDE',
         imageUrl: null,
         phoneNumber: '+34 600 345 678',
         email: 'ana.rodriguez@email.com',
