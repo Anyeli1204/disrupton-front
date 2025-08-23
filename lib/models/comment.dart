@@ -13,6 +13,10 @@ class Comment {
   final bool isEdited;
   final bool isDeleted;
   final Map<String, dynamic>? metadata;
+  final List<String> imageUrls; // URLs de las imágenes adjuntas
+  final int likeCount; // Contador de likes del backend
+  final int dislikeCount; // Contador de dislikes del backend
+  final String? userReaction; // Reacción del usuario actual: 'like', 'dislike', null
 
   Comment({
     required this.id,
@@ -29,6 +33,10 @@ class Comment {
     this.isEdited = false,
     this.isDeleted = false,
     this.metadata,
+    this.imageUrls = const [],
+    this.likeCount = 0,
+    this.dislikeCount = 0,
+    this.userReaction,
   });
 
   factory Comment.fromJson(Map<String, dynamic> json) {
@@ -46,15 +54,30 @@ class Comment {
       dislikes: json['dislikes'] != null 
           ? List<String>.from(json['dislikes'])
           : [],
-      createdAt: json['createdAt'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(json['createdAt']['seconds'] * 1000)
+      createdAt: json['createdAt'] != null 
+          ? _parseFirestoreTimestamp(json['createdAt'])
           : DateTime.now(),
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(json['updatedAt']['seconds'] * 1000)
+      updatedAt: json['updatedAt'] != null 
+          ? _parseFirestoreTimestamp(json['updatedAt'])
           : null,
       isEdited: json['isEdited'] ?? false,
       isDeleted: json['isDeleted'] ?? false,
       metadata: json['metadata'],
+      imageUrls: (() {
+        // Soportar distintos nombres de campo provenientes del backend
+        final dynamic v = json['imageUrls'] ?? json['imagenes'] ?? json['downloadUrls'];
+        if (v is List) {
+          return List<String>.from(v);
+        }
+        if (v is String) {
+          // Permitir string separado por comas
+          return v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+        }
+        return <String>[];
+      })(),
+      likeCount: json['likeCount'] ?? 0,
+      dislikeCount: json['dislikeCount'] ?? 0,
+      userReaction: json['userReaction'],
     );
   }
 
@@ -74,6 +97,7 @@ class Comment {
       'isEdited': isEdited,
       'isDeleted': isDeleted,
       'metadata': metadata,
+      'imageUrls': imageUrls,
     };
   }
 
@@ -92,6 +116,10 @@ class Comment {
     bool? isEdited,
     bool? isDeleted,
     Map<String, dynamic>? metadata,
+    List<String>? imageUrls,
+    int? likeCount,
+    int? dislikeCount,
+    String? userReaction,
   }) {
     return Comment(
       id: id ?? this.id,
@@ -108,7 +136,25 @@ class Comment {
       isEdited: isEdited ?? this.isEdited,
       isDeleted: isDeleted ?? this.isDeleted,
       metadata: metadata ?? this.metadata,
+      imageUrls: imageUrls ?? this.imageUrls,
+      likeCount: likeCount ?? this.likeCount,
+      dislikeCount: dislikeCount ?? this.dislikeCount,
+      userReaction: userReaction ?? this.userReaction,
     );
+  }
+
+  // Helper method para parsear Firestore Timestamp
+  static DateTime _parseFirestoreTimestamp(dynamic timestamp) {
+    if (timestamp is Map<String, dynamic>) {
+      final seconds = timestamp['seconds'] as int?;
+      if (seconds != null) {
+        return DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
+      }
+    }
+    if (timestamp is String) {
+      return DateTime.parse(timestamp);
+    }
+    return DateTime.now();
   }
 
   // Métodos de utilidad

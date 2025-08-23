@@ -1,28 +1,48 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import '../config/app_config.dart';
 import '../models/comment.dart';
 import '../models/mural_question.dart';
 import '../models/user.dart';
 import 'auth_service.dart';
 
+// Helper method para parsear Firestore Timestamp
+DateTime _parseFirestoreTimestamp(dynamic timestamp) {
+  if (timestamp is Map<String, dynamic>) {
+    final seconds = timestamp['seconds'] as int?;
+    if (seconds != null) {
+      return DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
+    }
+  }
+  if (timestamp is String) {
+    return DateTime.parse(timestamp);
+  }
+  return DateTime.now();
+}
+
 class MuralService {
   static const String baseUrl = AppConfig.baseUrl;
   
-  // Obtener comentarios del mural
-  static Future<List<Comment>> getMuralComments() async {
+  // Obtener comentarios del mural con reacciones
+  static Future<List<Comment>> getMuralComments({String? userId}) async {
     try {
       final activeQuestion = await getActiveMuralQuestion();
       if (activeQuestion == null) {
-        // Si no hay pregunta activa, devolver una lista vacía o manejar como se prefiera
         return [];
       }
 
       final authService = AuthService();
       final headers = authService.getAuthHeaders();
       
+      String url = '$baseUrl/api/mural/comentarios/${activeQuestion.id}';
+      if (userId != null) {
+        url += '?userId=$userId';
+      }
+      
       final response = await http.get(
-        Uri.parse('$baseUrl/api/mural/comentarios/${activeQuestion.id}'),
+        Uri.parse(url),
         headers: headers,
       );
 
@@ -33,7 +53,6 @@ class MuralService {
         throw Exception('Error al obtener comentarios: ${response.statusCode}');
       }
     } catch (e) {
-      // Si hay error, usar datos de ejemplo
       return getSampleComments();
     }
   }
@@ -62,21 +81,31 @@ class MuralService {
     }
   }
 
-  // Crear comentario en el mural
-  static Future<Comment?> createMuralComment(String text, String userId, Map<String, String> authHeaders, {String? questionId, User? user}) async {
+  // Crear comentario en el mural con soporte para imágenes y respuestas
+  static Future<Comment?> createMuralComment(String text, String userId, Map<String, String> authHeaders, {String? questionId, User? user, List<String>? imageUrls, String? parentCommentId}) async {
     try {
       final headers = {
         'Content-Type': 'application/json',
       }..addAll(authHeaders);
 
+      final body = <String, dynamic>{
+        'text': text,
+        'userId': userId,
+        'preguntaId': questionId,
+      };
+      
+      if (imageUrls != null && imageUrls.isNotEmpty) {
+        body['imageUrls'] = imageUrls;
+      }
+      
+      if (parentCommentId != null && parentCommentId.isNotEmpty) {
+        body['parentCommentId'] = parentCommentId;
+      }
+
       final response = await http.post(
-        Uri.parse('$baseUrl/api/mural/comentarios'), // Endpoint corregido
+        Uri.parse('$baseUrl/api/mural/comentarios'),
         headers: headers,
-        body: json.encode({
-          'text': text,
-          'userId': userId,
-          'preguntaId': questionId, // El backend espera 'preguntaId'
-        }),
+        body: json.encode(body),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) { // El backend devuelve 200 OK
@@ -92,12 +121,14 @@ class MuralService {
               text: commentData['text'] ?? text,
               userId: commentData['userId'] ?? userId,
               userName: user?.name ?? 'Usuario',
+              parentCommentId: commentData['parentCommentId'] ?? parentCommentId,
               createdAt: commentData['createdAt'] != null 
-                  ? DateTime.parse(commentData['createdAt'].toString())
+                  ? _parseFirestoreTimestamp(commentData['createdAt'])
                   : DateTime.now(),
               likes: [],
               dislikes: [],
               isEdited: false,
+              imageUrls: imageUrls ?? [],
             );
           } else {
             // Fallback si no hay commentData
@@ -106,10 +137,12 @@ class MuralService {
               text: text,
               userId: userId,
               userName: user?.name ?? 'Usuario',
+              parentCommentId: parentCommentId,
               createdAt: DateTime.now(),
               likes: [],
               dislikes: [],
               isEdited: false,
+              imageUrls: imageUrls ?? [],
             );
           }
         } else {
@@ -168,73 +201,166 @@ class MuralService {
     }
   }
 
-  // Dar like a un comentario
-  static Future<bool> likeComment(String commentId, String userId) async {
+  // Reaccionar a un comentario (like/dislike con toggle)
+  static Future<Map<String, dynamic>> reactToComment(String commentId, String userId, String reactionType) async {
     try {
       final authService = AuthService();
       final headers = authService.getAuthHeaders();
       final response = await http.post(
-        Uri.parse('$baseUrl/api/mural/comments/$commentId/like'),
+        Uri.parse('$baseUrl/api/mural/comentarios/$commentId/reactions?userId=$userId&type=$reactionType'),
         headers: headers,
-        body: json.encode({
-          'userId': userId,
-          'timestamp': DateTime.now().toIso8601String(),
-        }),
       );
 
-      return response.statusCode == 200;
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        
+        // Asegurar que los conteos nunca sean negativos
+        if (responseData.containsKey('likeCount')) {
+          responseData['likeCount'] = (responseData['likeCount'] as int? ?? 0).clamp(0, double.infinity).toInt();
+        }
+        if (responseData.containsKey('dislikeCount')) {
+          responseData['dislikeCount'] = (responseData['dislikeCount'] as int? ?? 0).clamp(0, double.infinity).toInt();
+        }
+        
+        return responseData;
+      } else {
+        throw Exception('Error al reaccionar: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error al reaccionar: $e');
+    }
+  }
+
+  // Dar like a un comentario (usando nuevo sistema)
+  static Future<bool> likeComment(String commentId, String userId) async {
+    try {
+      await reactToComment(commentId, userId, 'like');
+      return true;
     } catch (e) {
       throw Exception('Error al dar like: $e');
     }
   }
 
-  // Quitar like de un comentario
+  // Quitar like de un comentario (usando nuevo sistema)
   static Future<bool> unlikeComment(String commentId, String userId) async {
     try {
-      final authService = AuthService();
-      final headers = authService.getAuthHeaders();
-      final response = await http.delete(
-        Uri.parse('$baseUrl/api/mural/comments/$commentId/like/$userId'),
-        headers: headers,
-      );
-
-      return response.statusCode == 200;
+      await reactToComment(commentId, userId, 'like'); // Toggle behavior
+      return true;
     } catch (e) {
       throw Exception('Error al quitar like: $e');
     }
   }
 
-  // Dar dislike a un comentario
+  // Dar dislike a un comentario (usando nuevo sistema)
   static Future<bool> dislikeComment(String commentId, String userId) async {
     try {
-      final authService = AuthService();
-      final headers = authService.getAuthHeaders();
-      final response = await http.post(
-        Uri.parse('$baseUrl/api/mural/comments/$commentId/dislike'),
-        headers: headers,
-        body: json.encode({
-          'userId': userId,
-          'timestamp': DateTime.now().toIso8601String(),
-        }),
-      );
-      return response.statusCode == 200;
+      await reactToComment(commentId, userId, 'dislike');
+      return true;
     } catch (e) {
       throw Exception('Error al dar dislike: $e');
     }
   }
 
-  // Quitar dislike de un comentario
+  // Quitar dislike de un comentario (usando nuevo sistema)
   static Future<bool> undislikeComment(String commentId, String userId) async {
+    try {
+      await reactToComment(commentId, userId, 'dislike'); // Toggle behavior
+      return true;
+    } catch (e) {
+      throw Exception('Error al quitar dislike: $e');
+    }
+  }
+
+  // Subir imágenes para comentarios
+  static Future<List<String>> uploadCommentImages(List<File> images, String userId, String commentId) async {
     try {
       final authService = AuthService();
       final headers = authService.getAuthHeaders();
-      final response = await http.delete(
-        Uri.parse('$baseUrl/api/mural/comments/$commentId/dislike/$userId'),
+      
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/api/firebase/storage/upload-comment-images'),
+      );
+
+      // Agregar headers de autenticación
+      request.headers.addAll(headers);
+      
+      // Agregar parámetros
+      request.fields['userId'] = userId;
+      request.fields['commentId'] = commentId;
+
+      // Agregar archivos con el nombre correcto esperado por el backend
+      for (int i = 0; i < images.length; i++) {
+        final file = images[i];
+        
+        // Detectar el tipo de contenido basado en la extensión del archivo
+        String? mimeType;
+        final extension = file.path.toLowerCase().split('.').last;
+        switch (extension) {
+          case 'jpg':
+          case 'jpeg':
+            mimeType = 'image/jpeg';
+            break;
+          case 'png':
+            mimeType = 'image/png';
+            break;
+          case 'gif':
+            mimeType = 'image/gif';
+            break;
+          case 'webp':
+            mimeType = 'image/webp';
+            break;
+          default:
+            mimeType = 'image/jpeg'; // Fallback
+        }
+        
+        final multipartFile = await http.MultipartFile.fromPath(
+          'files', // Cambiar de 'images' a 'files' para coincidir con el backend
+          file.path,
+          contentType: MediaType.parse(mimeType),
+        );
+        request.files.add(multipartFile);
+      }
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+
+      if (response.statusCode == 200) {
+        final data = json.decode(responseBody);
+        // El backend devuelve 'downloadUrls' no 'imageUrls'
+        final urls = data['downloadUrls'];
+        if (urls is List) {
+          return List<String>.from(urls);
+        } else if (urls is String) {
+          // Si es un string separado por comas, dividirlo
+          return urls.split(',').where((url) => url.trim().isNotEmpty).toList();
+        }
+        return [];
+      } else {
+        throw Exception('Error al subir imágenes: ${response.statusCode} - $responseBody');
+      }
+    } catch (e) {
+      throw Exception('Error al subir imágenes: $e');
+    }
+  }
+
+  // Obtener conteos de reacciones para un comentario
+  static Future<Map<String, dynamic>> getCommentReactions(String commentId) async {
+    try {
+      final authService = AuthService();
+      final headers = authService.getAuthHeaders();
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/mural/comentarios/$commentId/reactions'),
         headers: headers,
       );
-      return response.statusCode == 200;
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('Error al obtener reacciones: ${response.statusCode}');
+      }
     } catch (e) {
-      throw Exception('Error al quitar dislike: $e');
+      throw Exception('Error al obtener reacciones: $e');
     }
   }
 

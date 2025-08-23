@@ -722,10 +722,10 @@ class _CulturalAgentsScreenState extends State<CulturalAgentsScreen> {
                   // Mostrar calificación y número de reseñas
                   Row(
                     children: [
-                      Icon(Icons.star, color: Colors.amber, size: 20),
+                      const Icon(Icons.star, color: Colors.amber, size: 20),
                       const SizedBox(width: 4),
                       Text(
-                        '${agent.rating?.toStringAsFixed(1) ?? '0.0'}',
+                        agent.rating?.toStringAsFixed(1) ?? '0.0',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,

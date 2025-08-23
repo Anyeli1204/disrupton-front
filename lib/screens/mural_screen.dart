@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/mural_question.dart';
 import '../models/comment.dart';
 import '../services/mural_service.dart';
@@ -16,6 +19,9 @@ class _MuralScreenState extends State<MuralScreen> {
   List<MuralQuestion> _questions = [];
   List<Comment> _comments = [];
   bool _isLoading = false;
+  final Set<String> _expandedReplies = {}; // IDs de comentarios con respuestas expandidas
+  final Set<String> _collapsedReplies = {}; // IDs de comentarios que el usuario ha colapsado manualmente
+  final ImagePicker _imagePicker = ImagePicker();
 
   @override
   void initState() {
@@ -31,7 +37,10 @@ class _MuralScreenState extends State<MuralScreen> {
     try {
       // Cargar pregunta activa del backend
       final activeQuestion = await MuralService.getActiveMuralQuestion();
-      final comments = await MuralService.getMuralComments();
+      if (!mounted) return;
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final userId = authProvider.currentUser?.userId;
+      final comments = await MuralService.getMuralComments(userId: userId);
       
       setState(() {
         _comments = comments;
@@ -224,7 +233,7 @@ class _MuralScreenState extends State<MuralScreen> {
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
+                                  color: Colors.grey[200]!.withValues(alpha: 0.8),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -388,48 +397,103 @@ class _MuralScreenState extends State<MuralScreen> {
 
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: _comments.length,
+      itemCount: _getVisibleComments().length,
       itemBuilder: (context, index) {
-        final comment = _comments[index];
+        final comment = _getVisibleComments()[index];
         return _buildCommentCard(comment);
       },
     );
   }
 
+  List<Comment> _getVisibleComments() {
+    List<Comment> visibleComments = [];
+    
+    // Primero agregar todos los comentarios principales
+    List<Comment> mainComments = _comments.where((c) => c.parentCommentId == null || c.parentCommentId!.isEmpty).toList();
+    
+    for (Comment mainComment in mainComments) {
+      visibleComments.add(mainComment);
+      
+      // Obtener respuestas para este comentario
+      List<Comment> replies = _comments.where((c) => c.parentCommentId == mainComment.id).toList();
+      
+      if (replies.isNotEmpty) {
+        // Mostrar respuestas solo si el usuario expandió explícitamente
+        if (_expandedReplies.contains(mainComment.id)) {
+          replies.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+          visibleComments.addAll(replies);
+        }
+      }
+    }
+    
+    return visibleComments;
+  }
+
   Widget _buildCommentCard(Comment comment) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+    final bool isReply = comment.parentCommentId != null && comment.parentCommentId!.isNotEmpty;
+    
+    return Container(
+      margin: EdgeInsets.only(
+        bottom: 12,
+        left: isReply ? 32 : 0, // Indentar respuestas
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header del comentario
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Colors.deepPurple[100],
-                  child: Text(
-                    comment.userName?.substring(0, 1).toUpperCase() ?? 'U',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
+      child: Card(
+        elevation: isReply ? 1 : 2,
+        color: isReply ? Colors.grey[50] : null,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: isReply ? BorderSide(color: Colors.grey[300]!, width: 1) : BorderSide.none,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Indicador de respuesta
+              if (isReply) ...[
+                Row(
+                  children: [
+                    Icon(
+                      Icons.subdirectory_arrow_right,
+                      size: 16,
+                      color: Colors.grey[600],
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Respuesta',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+              ],
+              
+              // Header del comentario
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: isReply ? 16 : 20,
+                    backgroundColor: Colors.deepPurple[100],
+                    child: Text(
+                      comment.userName?.substring(0, 1).toUpperCase() ?? 'U',
+                      style: TextStyle(
+                        fontSize: isReply ? 14 : 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepPurple,
+                      ),
                     ),
                   ),
-                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        comment.userName ?? 'Usuario',
+                        comment.userName ?? 'Usuario Anónimo',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -477,28 +541,30 @@ class _MuralScreenState extends State<MuralScreen> {
               ),
             ),
             
-            const SizedBox(height: 16),
+            // Mostrar imágenes si las hay
+            if (comment.imageUrls.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              _buildImageGallery(comment.imageUrls),
+            ],
+            
+            const SizedBox(height: 12),
             
             // Acciones del comentario
             Row(
               children: [
-                // Like
-                InkWell(
+                // Like button
+                GestureDetector(
                   onTap: () => _handleLike(comment),
                   child: Row(
                     children: [
                       Icon(
-                        comment.isLikedBy('currentUser') 
-                            ? Icons.favorite 
-                            : Icons.favorite_border,
-                        color: comment.isLikedBy('currentUser') 
-                            ? Colors.red 
-                            : Colors.grey[600],
+                        comment.userReaction == 'like' ? Icons.favorite : Icons.favorite_border,
+                        color: comment.userReaction == 'like' ? Colors.red : Colors.grey,
                         size: 20,
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '${comment.likes.length}',
+                        '${comment.likeCount}',
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 14,
@@ -507,26 +573,20 @@ class _MuralScreenState extends State<MuralScreen> {
                     ],
                   ),
                 ),
-                
-                const SizedBox(width: 24),
-                
-                // Dislike
-                InkWell(
+                const SizedBox(width: 16),
+                // Dislike button
+                GestureDetector(
                   onTap: () => _handleDislike(comment),
                   child: Row(
                     children: [
                       Icon(
-                        comment.isDislikedBy('currentUser') 
-                            ? Icons.thumb_down 
-                            : Icons.thumb_down_outlined,
-                        color: comment.isDislikedBy('currentUser') 
-                            ? Colors.blue 
-                            : Colors.grey[600],
+                        comment.userReaction == 'dislike' ? Icons.thumb_down : Icons.thumb_down_outlined,
+                        color: comment.userReaction == 'dislike' ? Colors.blue : Colors.grey,
                         size: 20,
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '${comment.dislikes.length}',
+                        '${comment.dislikeCount}',
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 14,
@@ -535,34 +595,93 @@ class _MuralScreenState extends State<MuralScreen> {
                     ],
                   ),
                 ),
-                
                 const Spacer(),
-                
-                // Responder
-                InkWell(
-                  onTap: () => _handleReply(comment),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.reply,
-                        color: Colors.grey[600],
-                        size: 20,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Responder',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
+                // Ver respuestas y Responder (solo en comentarios principales)
+                if (comment.parentCommentId == null) ...[
+                  _buildViewRepliesButton(comment),
+                  IconButton(
+                    tooltip: 'Responder',
+                    icon: Icon(
+                      Icons.add_circle_outline,
+                      color: Colors.grey[600],
+                      size: 22,
+                    ),
+                    onPressed: () => _handleReply(comment),
                   ),
-                ),
+                ],
               ],
             ),
+            const SizedBox(height: 8),
           ],
         ),
+      ),
+    ),
+  );
+  }
+
+  Widget _buildViewRepliesButton(Comment comment) {
+    // Contar respuestas para este comentario
+    final replyCount = _comments.where((c) => c.parentCommentId == comment.id).length;
+    if (replyCount == 0) return const SizedBox.shrink();
+
+    final isExpanded = _expandedReplies.contains(comment.id);
+    return IconButton(
+      tooltip: isExpanded
+          ? 'Ocultar respuestas'
+          : 'Ver respuestas ($replyCount)',
+      icon: Icon(
+        isExpanded ? Icons.forum : Icons.forum_outlined,
+        color: Colors.deepPurple,
+      ),
+      onPressed: () => _toggleRepliesVisibility(comment.id),
+    );
+  }
+
+  Widget _buildImageGallery(List<String> imageUrls) {
+    if (imageUrls.isEmpty) return const SizedBox.shrink();
+    
+    return SizedBox(
+      height: 200,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: imageUrls.length,
+        itemBuilder: (context, index) {
+          return Container(
+            width: 200,
+            margin: EdgeInsets.only(right: index < imageUrls.length - 1 ? 8 : 0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                imageUrls[index],
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: Colors.grey[300],
+                    child: const Icon(
+                      Icons.broken_image,
+                      color: Colors.grey,
+                      size: 50,
+                    ),
+                  );
+                },
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Container(
+                    color: Colors.grey[200],
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                            : null,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -584,39 +703,138 @@ class _MuralScreenState extends State<MuralScreen> {
 
   void _showAddCommentDialog(MuralQuestion question) {
     final commentController = TextEditingController();
+    List<File> selectedImages = [];
     
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Agregar Comentario'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Pregunta: ${question.question}',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
-              ),
-            ),
-            
-            const SizedBox(height: 16),
-            
-            TextField(
-              controller: commentController,
-              maxLines: 4,
-              decoration: InputDecoration(
-                hintText: 'Escribe tu comentario...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Agregar Comentario'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Pregunta: ${question.question}',
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 14,
+                  ),
                 ),
-                filled: true,
-                fillColor: Colors.grey[50],
-              ),
+                
+                const SizedBox(height: 16),
+                
+                TextField(
+                  controller: commentController,
+                  maxLines: 4,
+                  decoration: InputDecoration(
+                    hintText: 'Escribe tu comentario...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                  ),
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Botón para agregar imágenes
+                Row(
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () => _selectImages(setDialogState, selectedImages),
+                      icon: const Icon(Icons.photo_library, size: 20),
+                      label: const Text('Seleccionar'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                        elevation: 1,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton.icon(
+                      onPressed: () => _selectImageFromCamera(setDialogState, selectedImages),
+                      icon: const Icon(Icons.camera_alt, size: 20),
+                      label: const Text('Cámara'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        elevation: 1,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    if (selectedImages.isNotEmpty)
+                      Text(
+                        '${selectedImages.length} imagen${selectedImages.length > 1 ? 'es' : ''}',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                        ),
+                      ),
+                  ],
+                ),
+                
+                // Preview de imágenes seleccionadas
+                if (selectedImages.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 80,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: selectedImages.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          width: 80,
+                          height: 80,
+                          margin: const EdgeInsets.only(right: 8),
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.file(
+                                  selectedImages[index],
+                                  width: 80,
+                                  height: 80,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setDialogState(() {
+                                      selectedImages.removeAt(index);
+                                    });
+                                  },
+                                  child: Container(
+                                    width: 20,
+                                    height: 20,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.close,
+                                      color: Colors.white,
+                                      size: 14,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ],
             ),
-          ],
-        ),
-        actions: [
+          ),
+          actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancelar'),
@@ -624,9 +842,6 @@ class _MuralScreenState extends State<MuralScreen> {
           ElevatedButton(
             onPressed: () async {
               if (commentController.text.trim().isEmpty) return;
-
-              // Desactivar el botón para evitar múltiples envíos
-              setState(() {});
 
               final navigator = Navigator.of(context);
               final scaffoldMessenger = ScaffoldMessenger.of(context);
@@ -644,13 +859,26 @@ class _MuralScreenState extends State<MuralScreen> {
               }
 
               try {
+                List<String>? imageUrls;
+                
+                // Subir imágenes si hay alguna seleccionada
+                if (selectedImages.isNotEmpty) {
+                  final tempCommentId = DateTime.now().millisecondsSinceEpoch.toString();
+                  imageUrls = await MuralService.uploadCommentImages(
+                    selectedImages, 
+                    user.userId, 
+                    tempCommentId
+                  );
+                }
+
                 final authHeaders = authProvider.getAuthHeaders();
                 final newComment = await MuralService.createMuralComment(
                   commentController.text.trim(),
-                  user.userId, // Pasa el ID del usuario actual
+                  user.userId,
                   authHeaders,
                   questionId: question.id,
                   user: user,
+                  imageUrls: imageUrls,
                 );
 
                 if (mounted && newComment != null) {
@@ -674,20 +902,119 @@ class _MuralScreenState extends State<MuralScreen> {
                     ),
                   );
                 }
-              } finally {
-                // Reactivar el botón
-                if (mounted) {
-                  setState(() {});
-                }
               }
             },
             child: const Text('Publicar'),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
+  Future<void> _selectImages(StateSetter setDialogState, List<File> selectedImages) async {
+    try {
+      // Usar selección individual desde galería para mayor compatibilidad
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1920,
+        maxHeight: 1080,
+        imageQuality: 85,
+      );
+      
+      if (image != null) {
+        try {
+          final file = File(image.path);
+          
+          // Verificar que el archivo existe
+          if (await file.exists()) {
+            // Verificar que es un archivo de imagen válido
+            final bytes = await file.readAsBytes();
+            if (bytes.isNotEmpty && selectedImages.length < 5) {
+              setDialogState(() {
+                selectedImages.add(file);
+              });
+            } else if (bytes.isEmpty) {
+              throw Exception('La imagen seleccionada está vacía');
+            } else {
+              throw Exception('Máximo 5 imágenes permitidas');
+            }
+          } else {
+            throw Exception('No se pudo acceder a la imagen seleccionada');
+          }
+        } catch (fileError) {
+          throw Exception('Error al procesar la imagen: $fileError');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al seleccionar imagen: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _selectImageFromCamera(StateSetter setDialogState, List<File> selectedImages) async {
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 1920,
+        maxHeight: 1080,
+        imageQuality: 85,
+      );
+      
+      if (image != null) {
+        try {
+          final file = File(image.path);
+          
+          // Verificar que el archivo existe y es válido
+          if (await file.exists()) {
+            final bytes = await file.readAsBytes();
+            if (bytes.isNotEmpty && selectedImages.length < 5) {
+              setDialogState(() {
+                selectedImages.add(file);
+              });
+            } else if (bytes.isEmpty) {
+              throw Exception('La imagen capturada está vacía');
+            } else {
+              throw Exception('Máximo 5 imágenes permitidas');
+            }
+          } else {
+            throw Exception('No se pudo acceder a la imagen capturada');
+          }
+        } catch (fileError) {
+          throw Exception('Error al procesar la imagen: $fileError');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al capturar imagen: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
+  }
+
+  void _toggleRepliesVisibility(String commentId) {
+    setState(() {
+      if (_expandedReplies.contains(commentId)) {
+        _expandedReplies.remove(commentId);
+        _collapsedReplies.add(commentId); // Marcar como colapsado manualmente
+      } else {
+        _expandedReplies.add(commentId);
+        _collapsedReplies.remove(commentId); // Quitar de colapsados si se expande
+      }
+    });
+  }
 
   void _handleLike(Comment comment) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -700,33 +1027,70 @@ class _MuralScreenState extends State<MuralScreen> {
     }
 
     final userId = user.userId;
-    final isLiked = comment.isLikedBy(userId);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     
-    // Actualización optimista de la UI
+    // Validación: Un usuario solo puede tener una reacción a la vez
+    final currentReaction = comment.userReaction;
+    
+    // Calcular nuevos valores basado en la lógica de toggle y exclusividad con validación de negativos
+    int newLikeCount;
+    int newDislikeCount;
+    String? newUserReaction;
+    
+    if (currentReaction == 'like') {
+      // Si ya tiene like, lo quita (asegurar que no sea negativo)
+      newLikeCount = (comment.likeCount - 1).clamp(0, double.infinity).toInt();
+      newDislikeCount = comment.dislikeCount;
+      newUserReaction = null;
+    } else if (currentReaction == 'dislike') {
+      // Si tiene dislike, lo cambia a like
+      newLikeCount = comment.likeCount + 1;
+      newDislikeCount = (comment.dislikeCount - 1).clamp(0, double.infinity).toInt();
+      newUserReaction = 'like';
+    } else {
+      // Si no tiene reacción, agrega like
+      newLikeCount = comment.likeCount + 1;
+      newDislikeCount = comment.dislikeCount;
+      newUserReaction = 'like';
+    }
+    
+    // Guardar estado original para posible reversión
+    final originalComment = comment;
+    
+    // Actualizar UI inmediatamente
     setState(() {
-      if (isLiked) {
-        comment.likes.remove(userId);
-      } else {
-        comment.likes.add(userId);
-        // Si estaba en dislike, se quita
-        comment.dislikes.remove(userId);
+      final index = _comments.indexWhere((c) => c.id == comment.id);
+      if (index != -1) {
+        _comments[index] = comment.copyWith(
+          likeCount: newLikeCount,
+          dislikeCount: newDislikeCount,
+          userReaction: newUserReaction,
+        );
       }
     });
-
+    
     try {
-      if (isLiked) {
-        await MuralService.unlikeComment(comment.id, userId);
-      } else {
-        await MuralService.likeComment(comment.id, userId);
+      // Enviar al backend y obtener conteos reales
+      final response = await MuralService.reactToComment(comment.id, userId, 'like');
+      
+      // Sincronizar con los conteos reales del backend
+      if (response.containsKey('likeCount') && response.containsKey('dislikeCount')) {
+        setState(() {
+          final index = _comments.indexWhere((c) => c.id == comment.id);
+          if (index != -1) {
+            _comments[index] = _comments[index].copyWith(
+              likeCount: response['likeCount'] ?? 0,
+              dislikeCount: response['dislikeCount'] ?? 0,
+            );
+          }
+        });
       }
     } catch (e) {
-      // Si falla, revertir el cambio en la UI
+      // Revertir cambios en caso de error
       setState(() {
-        if (isLiked) {
-          comment.likes.add(userId);
-        } else {
-          comment.likes.remove(userId);
+        final index = _comments.indexWhere((c) => c.id == comment.id);
+        if (index != -1) {
+          _comments[index] = originalComment;
         }
       });
       scaffoldMessenger.showSnackBar(
@@ -746,33 +1110,70 @@ class _MuralScreenState extends State<MuralScreen> {
     }
 
     final userId = user.userId;
-    final isDisliked = comment.isDislikedBy(userId);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-
-    // Actualización optimista de la UI
+    
+    // Validación: Un usuario solo puede tener una reacción a la vez
+    final currentReaction = comment.userReaction;
+    
+    // Calcular nuevos valores basado en la lógica de toggle y exclusividad con validación de negativos
+    int newLikeCount;
+    int newDislikeCount;
+    String? newUserReaction;
+    
+    if (currentReaction == 'dislike') {
+      // Si ya tiene dislike, lo quita (asegurar que no sea negativo)
+      newLikeCount = comment.likeCount;
+      newDislikeCount = (comment.dislikeCount - 1).clamp(0, double.infinity).toInt();
+      newUserReaction = null;
+    } else if (currentReaction == 'like') {
+      // Si tiene like, lo cambia a dislike
+      newLikeCount = (comment.likeCount - 1).clamp(0, double.infinity).toInt();
+      newDislikeCount = comment.dislikeCount + 1;
+      newUserReaction = 'dislike';
+    } else {
+      // Si no tiene reacción, agrega dislike
+      newLikeCount = comment.likeCount;
+      newDislikeCount = comment.dislikeCount + 1;
+      newUserReaction = 'dislike';
+    }
+    
+    // Guardar estado original para posible reversión
+    final originalComment = comment;
+    
+    // Actualizar UI inmediatamente
     setState(() {
-      if (isDisliked) {
-        comment.dislikes.remove(userId);
-      } else {
-        comment.dislikes.add(userId);
-        // Si estaba en like, se quita
-        comment.likes.remove(userId);
+      final index = _comments.indexWhere((c) => c.id == comment.id);
+      if (index != -1) {
+        _comments[index] = comment.copyWith(
+          likeCount: newLikeCount,
+          dislikeCount: newDislikeCount,
+          userReaction: newUserReaction,
+        );
       }
     });
-
+    
     try {
-      if (isDisliked) {
-        await MuralService.undislikeComment(comment.id, userId);
-      } else {
-        await MuralService.dislikeComment(comment.id, userId);
+      // Enviar al backend y obtener conteos reales
+      final response = await MuralService.reactToComment(comment.id, userId, 'dislike');
+      
+      // Sincronizar con los conteos reales del backend
+      if (response.containsKey('likeCount') && response.containsKey('dislikeCount')) {
+        setState(() {
+          final index = _comments.indexWhere((c) => c.id == comment.id);
+          if (index != -1) {
+            _comments[index] = _comments[index].copyWith(
+              likeCount: response['likeCount'] ?? 0,
+              dislikeCount: response['dislikeCount'] ?? 0,
+            );
+          }
+        });
       }
     } catch (e) {
-      // Si falla, revertir el cambio en la UI
+      // Revertir cambios en caso de error
       setState(() {
-        if (isDisliked) {
-          comment.dislikes.add(userId);
-        } else {
-          comment.dislikes.remove(userId);
+        final index = _comments.indexWhere((c) => c.id == comment.id);
+        if (index != -1) {
+          _comments[index] = originalComment;
         }
       });
       scaffoldMessenger.showSnackBar(
@@ -782,11 +1183,231 @@ class _MuralScreenState extends State<MuralScreen> {
   }
 
   void _handleReply(Comment comment) {
-    // Implementar lógica de respuesta
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Función de respuesta en desarrollo'),
-        backgroundColor: Colors.blue,
+    final commentController = TextEditingController();
+    List<File> selectedImages = [];
+    
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text('Responder a ${comment.userName ?? 'Usuario Anónimo'}'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Mostrar el comentario original
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        comment.userName ?? 'Usuario Anónimo',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        comment.text,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[700],
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 16),
+                
+                TextField(
+                  controller: commentController,
+                  maxLines: 4,
+                  decoration: InputDecoration(
+                    hintText: 'Escribe tu respuesta...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                  ),
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Botón para agregar imágenes
+                Row(
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () => _selectImages(setDialogState, selectedImages),
+                      icon: const Icon(Icons.photo_library, size: 20),
+                      label: const Text('Seleccionar'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                        elevation: 1,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton.icon(
+                      onPressed: () => _selectImageFromCamera(setDialogState, selectedImages),
+                      icon: const Icon(Icons.camera_alt, size: 20),
+                      label: const Text('Cámara'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        elevation: 1,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    if (selectedImages.isNotEmpty)
+                      Text(
+                        '${selectedImages.length} imagen${selectedImages.length > 1 ? 'es' : ''}',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                        ),
+                      ),
+                  ],
+                ),
+                
+                // Preview de imágenes seleccionadas
+                if (selectedImages.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 80,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: selectedImages.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          width: 80,
+                          height: 80,
+                          margin: const EdgeInsets.only(right: 8),
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.file(
+                                  selectedImages[index],
+                                  width: 80,
+                                  height: 80,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setDialogState(() {
+                                      selectedImages.removeAt(index);
+                                    });
+                                  },
+                                  child: Container(
+                                    width: 20,
+                                    height: 20,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.close,
+                                      color: Colors.white,
+                                      size: 14,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (commentController.text.trim().isEmpty) return;
+
+                // Capturar referencias antes de operaciones asíncronas
+                final navigator = Navigator.of(context);
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                final user = authProvider.currentUser;
+
+                if (user == null) {
+                  scaffoldMessenger.showSnackBar(
+                    const SnackBar(
+                      content: Text('Debes iniciar sesión para responder'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+
+                try {
+                  // Validación redundante removida; ya validamos user arriba
+                  
+                  // Las respuestas NO permiten imágenes
+                  await MuralService.createMuralComment(
+                    commentController.text.trim(),
+                    user.userId,
+                    authProvider.getAuthHeaders(),
+                    questionId: _questions.isNotEmpty ? _questions.first.id : '',
+                    parentCommentId: comment.id,
+                  );
+                  
+                  if (mounted) {
+                    navigator.pop();
+                    
+                    scaffoldMessenger.showSnackBar(
+                    const SnackBar(
+                      content: Text('Respuesta publicada exitosamente'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                  
+                    // Recargar comentarios y expandir automáticamente las respuestas
+                    await _loadData();
+                    setState(() {
+                      _expandedReplies.add(comment.id);
+                      _collapsedReplies.remove(comment.id);
+                    });
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    scaffoldMessenger.showSnackBar(
+                      SnackBar(
+                        content: Text('Error al publicar respuesta: ${e.toString()}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+              child: const Text('Responder'),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -136,7 +136,7 @@ class MuralQuestion {
   static DateTime _parseFirestoreTimestamp(dynamic timestamp) {
     if (timestamp is Map<String, dynamic>) {
       final seconds = timestamp['seconds'] as int?;
-      final nanos = timestamp['nanos'] as int?;
+      // final nanos = (microseconds % 1000000) * 1000;as int?;
       if (seconds != null) {
         return DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
       }
