@@ -1,14 +1,14 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import '../models/pieza.dart';
 
 class ModelLoader {
   static const String _cacheDir = 'model_cache';
-  
+
   // Cargar modelo 3D desde URL
-  static Future<String?> cargarModeloDesdeUrl(String url, String modelId) async {
+  static Future<String?> cargarModeloDesdeUrl(
+      String url, String modelId) async {
     try {
       // Verificar si el modelo ya está en caché
       final cachedPath = await _obtenerRutaCache(modelId);
@@ -50,7 +50,7 @@ class ModelLoader {
   }
 
   // Obtener tamaño del modelo
-  static Future<int?> obtenerTamañoModelo(String url) async {
+  static Future<int?> obtenerTamanoModelo(String url) async {
     try {
       final response = await http.head(Uri.parse(url));
       if (response.statusCode == 200) {
@@ -83,7 +83,7 @@ class ModelLoader {
         // Aquí podrías parsear el archivo GLB/GLTF para obtener metadatos
         // Por ahora retornamos información básica
         return {
-          'tamaño': response.bodyBytes.length,
+          'tamano': response.bodyBytes.length,
           'formato': url.split('.').last.toLowerCase(),
           'disponible': true,
         };
@@ -104,12 +104,12 @@ class ModelLoader {
   }
 
   // Verificar espacio disponible en caché
-  static Future<bool> hayEspacioDisponible(int tamañoRequerido) async {
+  static Future<bool> hayEspacioDisponible(int tamanoRequerido) async {
     try {
       final cacheDir = await getTemporaryDirectory();
       final stat = await cacheDir.stat();
       final espacioDisponible = stat.size;
-      return espacioDisponible > tamañoRequerido;
+      return espacioDisponible > tamanoRequerido;
     } catch (e) {
       return false;
     }
