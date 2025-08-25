@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/api_config.dart';
 import '../models/event.dart';
+import 'mock_event_service.dart';
 
 class EventService {
   static const String _baseUrl = '${ApiConfig.baseUrl}/events';
@@ -37,10 +38,15 @@ class EventService {
       } else if (response.statusCode == 401) {
         throw Exception('No autorizado. Por favor, inicia sesión nuevamente.');
       } else {
-        throw Exception('Error al cargar eventos: ${response.statusCode}');
+        // Si hay error del servidor, usar datos mock como fallback
+        print(
+            'Backend no disponible (${response.statusCode}), usando datos de demostración...');
+        return MockEventService.getMockEvents();
       }
     } catch (e) {
-      throw Exception('Error de conexión: $e');
+      // En caso de error de conexión, usar datos mock
+      print('Error de conexión al backend, usando datos de demostración: $e');
+      return MockEventService.getMockEvents();
     }
   }
 
@@ -61,10 +67,15 @@ class EventService {
       } else if (response.statusCode == 403) {
         throw Exception('No tienes permisos para ver todos los eventos.');
       } else {
-        throw Exception('Error al cargar eventos: ${response.statusCode}');
+        // Si hay error del servidor, usar datos mock como fallback
+        print(
+            'Backend no disponible (${response.statusCode}), usando datos de demostración...');
+        return MockEventService.getMockEvents();
       }
     } catch (e) {
-      throw Exception('Error de conexión: $e');
+      // En caso de error de conexión, usar datos mock
+      print('Error de conexión al backend, usando datos de demostración: $e');
+      return MockEventService.getMockEvents();
     }
   }
 

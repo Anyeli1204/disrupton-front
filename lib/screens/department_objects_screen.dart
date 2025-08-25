@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/safe_network_image.dart';
 import 'package:provider/provider.dart';
 import '../providers/collection_provider.dart';
 import '../models/collection_models.dart';
@@ -81,8 +82,7 @@ class _DepartmentObjectsScreenState extends State<DepartmentObjectsScreen> {
           // Header con información del departamento
           Container(
             width: double.infinity,
-            margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -92,14 +92,6 @@ class _DepartmentObjectsScreenState extends State<DepartmentObjectsScreen> {
                   Colors.deepPurple.shade600,
                 ],
               ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -112,10 +104,10 @@ class _DepartmentObjectsScreenState extends State<DepartmentObjectsScreen> {
                       size: 28,
                     ),
                     const SizedBox(width: 12),
-                    Expanded(
+                    const Expanded(
                       child: Text(
                         'Objetos Culturales',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -293,24 +285,12 @@ class _CulturalObjectCard extends StatelessWidget {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              Colors.deepPurple.shade200,
-                              Colors.deepPurple.shade400,
-                            ],
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.image,
-                          size: 40,
-                          color: Colors.white70,
-                        ),
+                      SafeNetworkImage(
+                        imageUrl: object.imageUrl,
+                        regionId: object.departmentId,
+                        category: object.category,
+                        fit: BoxFit.cover,
                       ),
-                      // Aquí iría la imagen real: Image.network(object.imageUrl)
                     ],
                   ),
                 ),

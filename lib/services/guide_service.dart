@@ -111,8 +111,8 @@ class GuideService {
         price: 150.0,
         currency: 'PEN',
         imageUrls: [
-          'https://via.placeholder.com/400x300/4CAF50/white?text=Machu+Picchu',
-          'https://via.placeholder.com/400x300/2196F3/white?text=Llamas',
+          'https://images.unsplash.com/photo-1526392060635-9d6019884377?w=800&h=600&fit=crop&crop=center',
+          'https://images.unsplash.com/photo-1583416750470-965b2707b355?w=800&h=600&fit=crop&crop=center',
         ],
         location: 'Cusco, Perú',
         duration: 8,
@@ -136,8 +136,8 @@ class GuideService {
         price: 80.0,
         currency: 'PEN',
         imageUrls: [
-          'https://via.placeholder.com/400x300/FF9800/white?text=Ceviche',
-          'https://via.placeholder.com/400x300/E91E63/white?text=Anticuchos',
+          'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800&h=600&fit=crop&crop=center',
+          'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800&h=600&fit=crop&crop=center',
         ],
         location: 'Lima, Perú',
         duration: 4,
@@ -161,8 +161,8 @@ class GuideService {
         price: 120.0,
         currency: 'PEN',
         imageUrls: [
-          'https://via.placeholder.com/400x300/FFC107/white?text=Oasis',
-          'https://via.placeholder.com/400x300/795548/white?text=Buggy',
+          'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=800&h=600&fit=crop&crop=center',
+          'https://images.unsplash.com/photo-1596142332133-327e2a4e4189?w=800&h=600&fit=crop&crop=center',
         ],
         location: 'Ica, Perú',
         duration: 6,

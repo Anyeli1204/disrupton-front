@@ -108,8 +108,8 @@ class ModeratorService {
             'Hermosa pieza de cerámica tradicional shipibo con diseños geométricos únicos.',
         modelUrl: 'https://example.com/model1.glb',
         imageUrls: [
-          'https://via.placeholder.com/300x300/4CAF50/white?text=Ceramica+1',
-          'https://via.placeholder.com/300x300/2196F3/white?text=Ceramica+2',
+          'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&crop=center',
+          'https://images.unsplash.com/photo-1605034313761-73ea4a0cfbf3?w=800&h=600&fit=crop&crop=center',
         ],
         status: 'pending',
         createdAt: DateTime.now().subtract(const Duration(hours: 2)),
@@ -124,8 +124,8 @@ class ModeratorService {
             'Textil tradicional andino con técnicas ancestrales de tejido.',
         modelUrl: 'https://example.com/model2.glb',
         imageUrls: [
-          'https://via.placeholder.com/300x300/FF9800/white?text=Textil+1',
-          'https://via.placeholder.com/300x300/E91E63/white?text=Textil+2',
+          'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&h=600&fit=crop&crop=center',
+          'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=800&h=600&fit=crop&crop=center',
         ],
         status: 'pending',
         createdAt: DateTime.now().subtract(const Duration(hours: 5)),
@@ -140,8 +140,8 @@ class ModeratorService {
             'Replica de joyería Moche con técnicas tradicionales de orfebrería.',
         modelUrl: 'https://example.com/model3.glb',
         imageUrls: [
-          'https://via.placeholder.com/300x300/FFC107/white?text=Joya+1',
-          'https://via.placeholder.com/300x300/795548/white?text=Joya+2',
+          'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&h=600&fit=crop&crop=center',
+          'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=800&h=600&fit=crop&crop=center',
         ],
         status: 'pending',
         createdAt: DateTime.now().subtract(const Duration(days: 1)),
@@ -160,7 +160,7 @@ class ModeratorService {
         description: 'Vasija inspirada en el arte Nazca.',
         modelUrl: 'https://example.com/model4.glb',
         imageUrls: [
-          'https://via.placeholder.com/300x300/9C27B0/white?text=Nazca'
+          'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&crop=center'
         ],
         status: 'approved',
         createdAt: DateTime.now().subtract(const Duration(days: 3)),
@@ -176,7 +176,7 @@ class ModeratorService {
         description: 'Máscara ritual de madera.',
         modelUrl: 'https://example.com/model5.glb',
         imageUrls: [
-          'https://via.placeholder.com/300x300/F44336/white?text=Mascara'
+          'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800&h=600&fit=crop&crop=center'
         ],
         status: 'rejected',
         createdAt: DateTime.now().subtract(const Duration(days: 5)),

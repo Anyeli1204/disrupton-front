@@ -81,7 +81,13 @@ class PermissionState {
       return false;
     }
 
-    // Show popup if user only chose "this time only" in last session
+    // Don't show if permanently denied or restricted
+    if (status == PermissionStatus.permanentlyDenied ||
+        status == PermissionStatus.restricted) {
+      return false;
+    }
+
+    // Show popup if user only chose "this time only" in last session and permission is not granted
     if (onlyThisTime && status != PermissionStatus.granted) {
       return true;
     }
@@ -91,13 +97,7 @@ class PermissionState {
       return true;
     }
 
-    // Don't show if permanently denied or restricted
-    if (status == PermissionStatus.permanentlyDenied ||
-        status == PermissionStatus.restricted) {
-      return false;
-    }
-
-    // Show if denied but not permanently
-    return status == PermissionStatus.denied;
+    // For any other case, don't show popup to avoid spam
+    return false;
   }
 }

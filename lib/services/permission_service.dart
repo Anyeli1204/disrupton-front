@@ -7,6 +7,7 @@ import '../models/permission_models.dart' as pm;
 class PermissionService {
   static const String _permissionStateKey = 'permission_states';
   static const String _tutorialCompletedKey = 'tutorial_completed';
+  static const String _firstLoginKey = 'first_login_completed';
 
   // Get saved permission states
   static Future<Map<pm.PermissionType, pm.PermissionState>>
@@ -98,18 +99,78 @@ class PermissionService {
     final states = await getSavedPermissionStates();
     final currentState = states[type] ?? _getDefaultPermissionState(type);
 
+    pm.PermissionStatus finalStatus = pm.PermissionStatus.denied;
+
+    if (allowWhileUsingApp || onlyThisTime) {
+      // First check current system permission status
+      final currentSystemStatus = await _checkSystemPermissionStatus(type);
+
+      if (currentSystemStatus == pm.PermissionStatus.granted) {
+        // System permission already granted
+        finalStatus = pm.PermissionStatus.granted;
+      } else {
+        // Request the actual system permission only if not already granted
+        final systemState = await requestPermission(type);
+        finalStatus = systemState.status;
+      }
+    }
+
     final updatedState = currentState.copyWith(
       hasAskedBefore: true,
       lastAskedDate: DateTime.now(),
       allowWhileUsingApp: allowWhileUsingApp,
       onlyThisTime: onlyThisTime,
-      status: allowWhileUsingApp || onlyThisTime
-          ? pm.PermissionStatus.granted
-          : pm.PermissionStatus.denied,
+      status: finalStatus,
     );
 
     states[type] = updatedState;
     await savePermissionStates(states);
+  }
+
+  // Check system permission status without requesting
+  static Future<pm.PermissionStatus> _checkSystemPermissionStatus(
+      pm.PermissionType type) async {
+    ph.Permission permission;
+
+    switch (type) {
+      case pm.PermissionType.camera:
+        permission = ph.Permission.camera;
+        break;
+      case pm.PermissionType.photos:
+        permission = ph.Permission.photos;
+        break;
+      case pm.PermissionType.storage:
+        permission = ph.Permission.storage;
+        break;
+      case pm.PermissionType.location:
+        permission = ph.Permission.location;
+        break;
+      case pm.PermissionType.microphone:
+        permission = ph.Permission.microphone;
+        break;
+    }
+
+    final status = await permission.status;
+    return _mapPermissionStatusOnly(status);
+  }
+
+  // Helper to map status without creating full PermissionState
+  static pm.PermissionStatus _mapPermissionStatusOnly(
+      ph.PermissionStatus status) {
+    switch (status) {
+      case ph.PermissionStatus.granted:
+        return pm.PermissionStatus.granted;
+      case ph.PermissionStatus.denied:
+        return pm.PermissionStatus.denied;
+      case ph.PermissionStatus.permanentlyDenied:
+        return pm.PermissionStatus.permanentlyDenied;
+      case ph.PermissionStatus.restricted:
+        return pm.PermissionStatus.restricted;
+      case ph.PermissionStatus.provisional:
+        return pm.PermissionStatus.provisional;
+      case ph.PermissionStatus.limited:
+        return pm.PermissionStatus.limited;
+    }
   }
 
   // Check current permission status
@@ -153,6 +214,30 @@ class PermissionService {
   static Future<void> resetTutorial() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_tutorialCompletedKey, false);
+  }
+
+  // First login management
+  static Future<bool> isFirstLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    return !(prefs.getBool(_firstLoginKey) ?? false);
+  }
+
+  static Future<void> markFirstLoginCompleted() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_firstLoginKey, true);
+  }
+
+  static Future<void> resetFirstLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_firstLoginKey, false);
+  }
+
+  // Reset all user preferences (for testing)
+  static Future<void> resetAllPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_permissionStateKey);
+    await prefs.remove(_tutorialCompletedKey);
+    await prefs.remove(_firstLoginKey);
   }
 
   // Private helper methods

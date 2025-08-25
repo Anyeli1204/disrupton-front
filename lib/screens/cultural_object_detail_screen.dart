@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/collection_models.dart';
+import '../widgets/safe_network_image.dart';
 
 class CulturalObjectDetailScreen extends StatelessWidget {
   final CulturalObject object;
@@ -36,19 +37,16 @@ class CulturalObjectDetailScreen extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    // Aquí iría la imagen real
-                    // Image.network(
-                    //   object.imageUrl,
-                    //   fit: BoxFit.cover,
-                    //   errorBuilder: (context, error, stackTrace) => Container(...)
-                    // ),
+                    // Imagen real del objeto
+                    SafeNetworkImage(
+                      imageUrl: object.imageUrl,
+                      regionId: object.departmentId,
+                      category: object.category,
+                      fit: BoxFit.cover,
+                    ),
 
                     // Placeholder mientras tanto
-                    const Icon(
-                      Icons.image,
-                      size: 100,
-                      color: Colors.white30,
-                    ),
+                    // Icono queda cubierto por la imagen; lo podemos mantener como backup visual bajo el overlay
 
                     // Overlay gradiente
                     Container(

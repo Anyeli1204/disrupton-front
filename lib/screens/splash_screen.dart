@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
-import '../models/auth_models.dart';
 import '../services/permission_service.dart';
 import 'login_screen.dart';
 import 'home_screen.dart';
@@ -44,16 +43,13 @@ class _SplashScreenState extends State<SplashScreen> {
         // Check if permissions need to be shown
         final permissionsNeeded =
             await PermissionService.getPermissionsNeedingPopup();
-        final user = authProvider.currentUser;
 
-        if (permissionsNeeded.isNotEmpty ||
-            (user?.role == UserRole.user &&
-                !await PermissionService.isTutorialCompleted())) {
-          // Show permission flow with tutorial for USER role
+        if (permissionsNeeded.isNotEmpty) {
+          // Show permission flow for existing users with pending permissions
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (context) => PermissionFlowManager(
-                isNewUser: user?.role == UserRole.user,
+                isNewUser: false, // Existing user
               ),
             ),
           );

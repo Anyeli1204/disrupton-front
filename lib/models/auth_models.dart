@@ -97,11 +97,8 @@ enum UserRole {
 
   static List<UserRole> get selectableRoles => [
         UserRole.user,
-        UserRole.admin,
-        UserRole.moderator,
         UserRole.guide,
         UserRole.artisan,
-        UserRole.premium,
       ];
 }
 

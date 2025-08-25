@@ -218,7 +218,8 @@ class AuthService {
       await prefs.setString(_userNameKey, authResponse.displayName!);
     }
 
-    // No establecer rol por defecto aquí; se elegirá en onboarding y se guardará con setUserRole
+    // Intentar obtener el rol del usuario desde el backend después del login
+    await _fetchAndSaveUserRole();
   }
 
   /// Limpia todos los datos de autenticación
@@ -274,5 +275,33 @@ class AuthService {
       'Accept': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
     };
+  }
+
+  /// Obtiene el rol del usuario desde el backend
+  Future<void> _fetchAndSaveUserRole() async {
+    try {
+      final token = await getToken();
+      if (token == null) return;
+
+      final response = await http.get(
+        Uri.parse('${ApiConfig.baseUrl}${ApiConfig.usersEndpoint}/me'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      ).timeout(const Duration(seconds: ApiConfig.timeoutSeconds));
+
+      if (response.statusCode == 200) {
+        final userData = jsonDecode(response.body);
+        final userRole = userData['role'];
+
+        if (userRole != null) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString(_userRoleKey, userRole);
+        }
+      }
+    } catch (e) {
+      // Fallar silenciosamente si no se puede obtener el rol
+    }
   }
 }

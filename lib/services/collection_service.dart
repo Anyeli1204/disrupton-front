@@ -9,152 +9,208 @@ class CollectionService {
     {
       'id': 'amazonas',
       'name': 'Amazonas',
-      'imageUrl': 'https://example.com/amazonas.jpg',
+      // Kuélap / Chachapoyas - Paisaje montañoso
+      'imageUrl':
+          'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=800&h=600&fit=crop&crop=center',
       'description':
           'Conocido por sus paisajes montañosos y la fortaleza de Kuélap.',
     },
     {
       'id': 'ancash',
       'name': 'Áncash',
-      'imageUrl': 'https://example.com/ancash.jpg',
+      // Huascarán / Cordillera Blanca - Montañas nevadas
+      'imageUrl':
+          'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&crop=center',
       'description':
           'Hogar del Parque Nacional Huascarán y culturas preincaicas.',
     },
     {
       'id': 'apurimac',
       'name': 'Apurímac',
-      'imageUrl': 'https://example.com/apurimac.jpg',
+      // Cañón del Apurímac - Paisaje andino
+      'imageUrl':
+          'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&h=600&fit=crop&crop=center',
       'description': 'Tierra de tradiciones andinas y paisajes montañosos.',
     },
     {
       'id': 'arequipa',
       'name': 'Arequipa',
-      'imageUrl': 'https://example.com/arequipa.jpg',
+      // Monasterio de Santa Catalina / Arequipa colonial
+      'imageUrl':
+          'https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=800&h=600&fit=crop&crop=center',
       'description': 'La Ciudad Blanca, con arquitectura colonial única.',
     },
     {
       'id': 'ayacucho',
       'name': 'Ayacucho',
-      'imageUrl': 'https://example.com/ayacucho.jpg',
+      // Iglesias coloniales / Tradiciones artesanales
+      'imageUrl':
+          'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=800&h=600&fit=crop&crop=center',
       'description': 'Centro de la cultura Wari y tradiciones artesanales.',
     },
     {
       'id': 'cajamarca',
       'name': 'Cajamarca',
-      'imageUrl': 'https://example.com/cajamarca.jpg',
+      // Ventanillas de Otuzco / Baños del Inca
+      'imageUrl':
+          'https://images.unsplash.com/photo-1586500036706-41963de24d8b?w=800&h=600&fit=crop&crop=center',
       'description':
           'Histórica ciudad donde se capturó al último emperador inca.',
     },
     {
       'id': 'callao',
       'name': 'Callao',
-      'imageUrl': 'https://example.com/callao.jpg',
+      // Real Felipe / La Punta - Puerto marítimo
+      'imageUrl':
+          'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&h=600&fit=crop&crop=center',
       'description': 'Principal puerto del Perú con rica historia marítima.',
     },
     {
       'id': 'cusco',
       'name': 'Cusco',
-      'imageUrl': 'https://example.com/cusco.jpg',
+      // Machu Picchu / Sacsayhuamán
+      'imageUrl':
+          'https://images.unsplash.com/photo-1526392060635-9d6019884377?w=800&h=600&fit=crop&crop=center',
       'description':
           'Antigua capital del Imperio Inca y Patrimonio de la Humanidad.',
     },
     {
       'id': 'huancavelica',
       'name': 'Huancavelica',
-      'imageUrl': 'https://example.com/huancavelica.jpg',
+      // Paisaje andino de Huancavelica
+      'imageUrl':
+          'https://images.unsplash.com/photo-1464822759844-d150baec93d1?w=800&h=600&fit=crop&crop=center',
       'description': 'Rica en tradiciones mineras y cultura andina.',
     },
     {
       'id': 'huanuco',
       'name': 'Huánuco',
-      'imageUrl': 'https://example.com/huanuco.jpg',
+      // Templo de Kotosh / Paisaje amazónico
+      'imageUrl':
+          'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop&crop=center',
       'description': 'Puerta de entrada a la Amazonía peruana.',
     },
     {
       'id': 'ica',
       'name': 'Ica',
-      'imageUrl': 'https://example.com/ica.jpg',
+      // Huacachina / Líneas de Nazca - Desierto
+      'imageUrl':
+          'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=800&h=600&fit=crop&crop=center',
       'description': 'Famosa por sus vinos, piscos y las líneas de Nazca.',
     },
     {
       'id': 'junin',
       'name': 'Junín',
-      'imageUrl': 'https://example.com/junin.jpg',
+      // Lago Junín / Valle del Mantaro
+      'imageUrl':
+          'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&crop=center',
       'description':
           'Centro de la minería y importantes batallas de independencia.',
     },
     {
       'id': 'la_libertad',
       'name': 'La Libertad',
-      'imageUrl': 'https://example.com/la_libertad.jpg',
+      // Chan Chan / Huanchaco - Costa norte
+      'imageUrl':
+          'https://images.unsplash.com/photo-1583416750470-965b2707b355?w=800&h=600&fit=crop&crop=center',
       'description': 'Hogar de las culturas Moche y Chimú.',
     },
     {
       'id': 'lambayeque',
       'name': 'Lambayeque',
-      'imageUrl': 'https://example.com/lambayeque.jpg',
+      // Museo Tumbas Reales de Sipán / Túcume
+      'imageUrl':
+          'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&crop=center',
       'description':
           'Cuna de la cultura Sicán y importantes hallazgos arqueológicos.',
     },
     {
       'id': 'lima',
       'name': 'Lima',
-      'imageUrl': 'https://example.com/lima.jpg',
+      // Plaza Mayor / Costa de Miraflores
+      'imageUrl':
+          'https://images.unsplash.com/photo-1531968455001-5c5272a41129?w=800&h=600&fit=crop&crop=center',
       'description': 'Capital del Perú con centro histórico colonial.',
     },
     {
       'id': 'loreto',
       'name': 'Loreto',
-      'imageUrl': 'https://example.com/loreto.jpg',
+      // Amazonas / Iquitos / Belén
+      'imageUrl':
+          'https://images.unsplash.com/photo-1520637736862-4d197d17c75a?w=800&h=600&fit=crop&crop=center',
       'description': 'El departamento más grande, corazón de la Amazonía.',
     },
     {
       'id': 'madre_de_dios',
       'name': 'Madre de Dios',
-      'imageUrl': 'https://example.com/madre_de_dios.jpg',
+      // Tambopata / Puerto Maldonado
+      'imageUrl':
+          'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop&crop=center',
       'description': 'Biodiversidad amazónica y comunidades nativas.',
     },
     {
       'id': 'moquegua',
       'name': 'Moquegua',
-      'imageUrl': 'https://example.com/moquegua.jpg',
+      // Valle y viñedos de Moquegua
+      'imageUrl':
+          'https://images.unsplash.com/photo-1596142332133-327e2a4e4189?w=800&h=600&fit=crop&crop=center',
       'description': 'Valle de viñedos y tradición vitivinícola.',
     },
     {
       'id': 'pasco',
       'name': 'Pasco',
-      'imageUrl': 'https://example.com/pasco.jpg',
+      // Bosque de Piedras de Huayllay
+      'imageUrl':
+          'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&crop=center',
       'description': 'Centro minero y paisajes de puna.',
     },
     {
       'id': 'piura',
       'name': 'Piura',
-      'imageUrl': 'https://example.com/piura.jpg',
+      // Máncora / Catacaos
+      'imageUrl':
+          'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=800&h=600&fit=crop&crop=center',
       'description': 'Playas del norte y cultura Vicús.',
     },
     {
       'id': 'puno',
       'name': 'Puno',
-      'imageUrl': 'https://example.com/puno.jpg',
+      // Lago Titicaca / Islas Uros
+      'imageUrl':
+          'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&h=600&fit=crop&crop=center',
       'description': 'Capital folklórica del Perú, a orillas del Titicaca.',
     },
     {
       'id': 'san_martin',
       'name': 'San Martín',
-      'imageUrl': 'https://example.com/san_martin.jpg',
+      // Tarapoto / Catarata Ahuashiyacu
+      'imageUrl':
+          'https://images.unsplash.com/photo-1520637836862-4d197d17c75a?w=800&h=600&fit=crop&crop=center',
       'description': 'Selva alta con rica biodiversidad.',
     },
     {
       'id': 'tacna',
       'name': 'Tacna',
-      'imageUrl': 'https://example.com/tacna.jpg',
+      // Arco Parabólico de Tacna
+      'imageUrl':
+          'https://images.unsplash.com/photo-1574263867128-0876df75bfe4?w=800&h=600&fit=crop&crop=center',
       'description': 'Ciudad heroica con importante legado histórico.',
     },
     {
       'id': 'tumbes',
       'name': 'Tumbes',
-      'imageUrl': 'https://example.com/tumbes.jpg',
+      // Manglares de Tumbes / Zorritos
+      'imageUrl':
+          'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=800&h=600&fit=crop&crop=center',
       'description': 'Playas tropicales y manglares únicos.',
+    },
+    {
+      'id': 'ucayali',
+      'name': 'Ucayali',
+      // Pucallpa / Yarinacocha
+      'imageUrl':
+          'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop&crop=center',
+      'description': 'Corazón de la Amazonía peruana con culturas vivas.',
     },
   ];
 
@@ -227,29 +283,69 @@ class CollectionService {
   /// Genera objetos culturales de ejemplo para desarrollo
   List<CulturalObject> _generateSampleCulturalObjects(String departmentId) {
     final samples = [
-      'Cerámica tradicional',
-      'Textiles ancestrales',
-      'Instrumentos musicales',
-      'Máscaras ceremoniales',
-      'Joyas precolombinas',
-      'Utensilios de cocina',
-      'Herramientas agrícolas',
-      'Arte rupestre',
+      {
+        'name': 'Cerámica tradicional',
+        'category': 'Cerámica',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&crop=center',
+      },
+      {
+        'name': 'Textiles ancestrales',
+        'category': 'Textilería',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=300&fit=crop&crop=center',
+      },
+      {
+        'name': 'Instrumentos musicales',
+        'category': 'Música',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop&crop=center',
+      },
+      {
+        'name': 'Máscaras ceremoniales',
+        'category': 'Ritual',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1578928032765-0ad5ac882d2d?w=400&h=300&fit=crop&crop=center',
+      },
+      {
+        'name': 'Joyas precolombinas',
+        'category': 'Orfebrería',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?w=400&h=300&fit=crop&crop=center',
+      },
+      {
+        'name': 'Utensilios de cocina',
+        'category': 'Utensilio',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop&crop=center',
+      },
+      {
+        'name': 'Herramientas agrícolas',
+        'category': 'Herramienta',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=300&fit=crop&crop=center',
+      },
+      {
+        'name': 'Arte rupestre',
+        'category': 'Arte',
+        'imageUrl':
+            'https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?w=400&h=300&fit=crop&crop=center',
+      },
     ];
 
     return samples.asMap().entries.map((entry) {
       final index = entry.key;
-      final name = entry.value;
+      final sample = entry.value;
 
       return CulturalObject(
         id: '${departmentId}_object_$index',
-        name: '$name de ${_getDepartmentName(departmentId)}',
-        imageUrl: 'https://picsum.photos/400/300?random=${departmentId}_$index',
+        name: '${sample['name']} de ${_getDepartmentName(departmentId)}',
+        imageUrl: sample['imageUrl']!,
         description:
             'Objeto cultural representativo de la región de ${_getDepartmentName(departmentId)}. '
             'Pieza única que refleja las tradiciones y el patrimonio cultural de la zona.',
         departmentId: departmentId,
-        category: 'Artesanía',
+        category: sample['category']!,
         createdAt: DateTime.now().subtract(Duration(days: index * 30)),
         additionalInfo: {
           'material': 'Diversos materiales tradicionales',
@@ -265,7 +361,9 @@ class CollectionService {
     return CulturalObject(
       id: objectId,
       name: 'Objeto Cultural Ejemplo',
-      imageUrl: 'https://picsum.photos/600/400?random=$objectId',
+      // Imagen de cerámica peruana
+      imageUrl:
+          'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&h=400&fit=crop&crop=center',
       description: 'Descripción detallada del objeto cultural. '
           'Este es un ejemplo de objeto cultural con información relevante '
           'sobre su origen, uso y significado histórico.',

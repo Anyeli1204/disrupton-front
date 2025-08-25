@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/collection_provider.dart';
 import '../models/collection_models.dart';
 import 'department_objects_screen.dart';
+import '../widgets/safe_network_image.dart';
 
 class CollectionsScreen extends StatefulWidget {
   const CollectionsScreen({super.key});
@@ -195,23 +196,11 @@ class _DepartmentCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // Imagen de fondo con placeholder
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.deepPurple.shade400,
-                      Colors.deepPurple.shade600,
-                    ],
-                  ),
-                ),
-                child: const Icon(
-                  Icons.landscape,
-                  size: 64,
-                  color: Colors.white70,
-                ),
+              // Imagen de fondo real
+              SafeNetworkImage(
+                imageUrl: department.imageUrl,
+                regionId: department.id,
+                fit: BoxFit.cover,
               ),
 
               // Overlay con degradado

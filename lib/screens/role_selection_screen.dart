@@ -18,29 +18,20 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
 
   final Map<UserRole, _RoleStyle> _roleStyles = {
     UserRole.user: _RoleStyle(Icons.person_outline, Colors.indigo),
-    UserRole.admin: _RoleStyle(Icons.security_outlined, Colors.redAccent),
-    UserRole.moderator: _RoleStyle(Icons.shield_moon_outlined, Colors.orange),
     UserRole.guide: _RoleStyle(Icons.map_outlined, Colors.teal),
     UserRole.artisan: _RoleStyle(Icons.brush_outlined, Colors.purple),
-    UserRole.premium: _RoleStyle(Icons.stars_outlined, Colors.amber),
   };
 
   final Map<UserRole, String> _labels = const {
     UserRole.user: 'Usuario regular',
-    UserRole.admin: 'Administrador',
-    UserRole.moderator: 'Moderador',
     UserRole.guide: 'Guía turístico',
     UserRole.artisan: 'Artesano',
-    UserRole.premium: 'Usuario premium',
   };
 
   final Map<UserRole, String> _descriptions = const {
     UserRole.user: 'Explora contenidos y vive experiencias AR a tu ritmo.',
-    UserRole.admin: 'Gestiona la plataforma y asegura una experiencia segura.',
-    UserRole.moderator: 'Revisa y aprueba contenido para mantener la calidad.',
     UserRole.guide: 'Crea rutas y acompaña a visitantes con experiencias AR.',
     UserRole.artisan: 'Exhibe tus piezas y comparte su historia con AR.',
-    UserRole.premium: 'Accede a funciones exclusivas y contenido anticipado.',
   };
 
   @override
@@ -72,7 +63,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Podrás cambiarlo más adelante en tu perfil.',
+                'Esta elección definirá tu experiencia en la plataforma.',
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey.shade600,
@@ -116,25 +107,24 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                           await auth.setUserRole(_selected!);
                           if (!mounted) return;
 
-                          // Check if we need to show permissions/tutorial for new USER
-                          if (_selected == UserRole.user) {
-                            final permissionsNeeded = await PermissionService
-                                .getPermissionsNeedingPopup();
-                            final tutorialCompleted =
-                                await PermissionService.isTutorialCompleted();
+                          // Check if we need to show permissions or tutorial for new users
+                          final permissionsNeeded = await PermissionService
+                              .getPermissionsNeedingPopup();
+                          final tutorialCompleted =
+                              await PermissionService.isTutorialCompleted();
 
-                            if (permissionsNeeded.isNotEmpty ||
-                                !tutorialCompleted) {
-                              Navigator.of(context).pushAndRemoveUntil(
-                                MaterialPageRoute(
-                                  builder: (_) => const PermissionFlowManager(
-                                    isNewUser: true,
-                                  ),
+                          if (permissionsNeeded.isNotEmpty ||
+                              !tutorialCompleted) {
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                builder: (_) => const PermissionFlowManager(
+                                  isNewUser:
+                                      true, // New user completing onboarding
                                 ),
-                                (route) => false,
-                              );
-                              return;
-                            }
+                              ),
+                              (route) => false,
+                            );
+                            return;
                           }
 
                           Navigator.of(context).pushAndRemoveUntil(

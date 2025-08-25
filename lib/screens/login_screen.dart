@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../services/permission_service.dart';
 import 'register_screen.dart';
 import 'home_screen.dart';
 import 'role_selection_screen.dart';
+import 'permission_flow_manager.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -46,9 +48,23 @@ class _LoginScreenState extends State<LoginScreen> {
           MaterialPageRoute(builder: (context) => const RoleSelectionScreen()),
         );
       } else {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
+        // For existing users with role, check only for permissions that need popup
+        final permissionsNeeded =
+            await PermissionService.getPermissionsNeedingPopup();
+
+        if (permissionsNeeded.isNotEmpty) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => PermissionFlowManager(
+                isNewUser: false, // Existing user, no tutorial needed
+              ),
+            ),
+          );
+        } else {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

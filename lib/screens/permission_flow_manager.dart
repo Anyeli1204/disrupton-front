@@ -79,8 +79,8 @@ class _PermissionFlowManagerState extends State<PermissionFlowManager> {
   }
 
   Future<void> _proceedToNextStep() async {
+    // Only show tutorial for new users who selected USER role and haven't seen it
     if (widget.isNewUser) {
-      // Check if tutorial is needed
       final tutorialCompleted = await PermissionService.isTutorialCompleted();
 
       if (!tutorialCompleted && mounted) {

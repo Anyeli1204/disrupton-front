@@ -57,17 +57,12 @@ class _PermissionPopupScreenState extends State<PermissionPopupScreen>
 
   Future<void> _handlePermissionChoice(
       bool allowWhileUsingApp, bool onlyThisTime) async {
-    // Update permission state
+    // Update permission state - this will handle the system permission request internally
     await PermissionService.updatePermissionChoice(
       widget.permissionType,
       allowWhileUsingApp,
       onlyThisTime,
     );
-
-    // Request actual system permission if allowed
-    if (allowWhileUsingApp || onlyThisTime) {
-      await PermissionService.requestPermission(widget.permissionType);
-    }
 
     // Close popup and call completion callback
     if (mounted) {
