@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/collection_models.dart';
+import '../models/ai_chat_models.dart';
 import '../widgets/safe_network_image.dart';
+import '../widgets/floating_ai_avatar.dart';
+import '../widgets/ai_chat_widget.dart';
+import '../services/ai_chat_service.dart';
 
-class CulturalObjectDetailScreen extends StatelessWidget {
+class CulturalObjectDetailScreen extends StatefulWidget {
   final CulturalObject object;
 
   const CulturalObjectDetailScreen({
@@ -11,171 +15,332 @@ class CulturalObjectDetailScreen extends StatelessWidget {
   });
 
   @override
+  State<CulturalObjectDetailScreen> createState() =>
+      _CulturalObjectDetailScreenState();
+}
+
+class _CulturalObjectDetailScreenState
+    extends State<CulturalObjectDetailScreen> {
+  bool _isChatOpen = false;
+  late AvatarType _selectedAvatar;
+
+  @override
+  void initState() {
+    super.initState();
+    // Obtener el avatar recomendado para este objeto
+    _selectedAvatar = AiChatService.getRecommendedAvatar(widget.object);
+  }
+
+  void _toggleChat() {
+    setState(() {
+      _isChatOpen = !_isChatOpen;
+    });
+  }
+
+  void _closeChat() {
+    setState(() {
+      _isChatOpen = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: CustomScrollView(
-        slivers: [
-          // App Bar con imagen
-          SliverAppBar(
-            expandedHeight: 300,
-            pinned: true,
-            backgroundColor: Colors.deepPurple.shade600,
-            foregroundColor: Colors.white,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.deepPurple.shade400,
-                      Colors.deepPurple.shade600,
-                    ],
-                  ),
-                ),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    // Imagen real del objeto
-                    SafeNetworkImage(
-                      imageUrl: object.imageUrl,
-                      regionId: object.departmentId,
-                      category: object.category,
-                      fit: BoxFit.cover,
-                    ),
-
-                    // Placeholder mientras tanto
-                    // Icono queda cubierto por la imagen; lo podemos mantener como backup visual bajo el overlay
-
-                    // Overlay gradiente
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Colors.black.withValues(alpha: 0.7),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.share),
-                onPressed: () => _shareObject(context),
-              ),
-              IconButton(
-                icon: const Icon(Icons.favorite_border),
-                onPressed: () => _toggleFavorite(context),
-              ),
-            ],
-          ),
-
-          // Contenido
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Título y categoría
-                  Text(
-                    object.name,
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                      height: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
+      body: Stack(
+        children: [
+          // Contenido principal del objeto cultural
+          CustomScrollView(
+            slivers: [
+              // App Bar con imagen
+              SliverAppBar(
+                expandedHeight: 300,
+                pinned: true,
+                backgroundColor: Colors.deepPurple.shade600,
+                foregroundColor: Colors.white,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
                     decoration: BoxDecoration(
-                      color: Colors.deepPurple.shade100,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      object.category,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.deepPurple.shade700,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.deepPurple.shade400,
+                          Colors.deepPurple.shade600,
+                        ],
                       ),
                     ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Descripción
-                  _buildSection(
-                    title: 'Descripción',
-                    icon: Icons.description,
-                    child: Text(
-                      object.description,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                        height: 1.6,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Información adicional
-                  if (object.additionalInfo != null &&
-                      object.additionalInfo!.isNotEmpty)
-                    _buildAdditionalInfo(),
-
-                  const SizedBox(height: 24),
-
-                  // Información del departamento
-                  _buildSection(
-                    title: 'Origen',
-                    icon: Icons.place,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Stack(
+                      fit: StackFit.expand,
                       children: [
-                        Text(
-                          'Departamento de ${_getDepartmentName(object.departmentId)}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black87,
-                          ),
+                        // Imagen real del objeto
+                        SafeNetworkImage(
+                          imageUrl: widget.object.imageUrl,
+                          regionId: widget.object.departmentId,
+                          category: widget.object.category,
+                          fit: BoxFit.cover,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Registrado el ${_formatDate(object.createdAt)}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey.shade600,
+
+                        // Overlay gradiente
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withValues(alpha: 0.7),
+                              ],
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
+                ),
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.share),
+                    onPressed: () => _shareObject(context),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.favorite_border),
+                    onPressed: () => _toggleFavorite(context),
+                  ),
+                ],
+              ),
 
-                  const SizedBox(height: 32),
+              // Contenido
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Título y categoría
+                      Text(
+                        widget.object.name,
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                          height: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.deepPurple.shade100,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          widget.object.category,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.deepPurple.shade700,
+                          ),
+                        ),
+                      ),
 
-                  // Botones de acción
-                  _buildActionButtons(context),
+                      const SizedBox(height: 24),
 
-                  const SizedBox(height: 32),
+                      // Descripción
+                      _buildSection(
+                        title: 'Descripción',
+                        icon: Icons.description,
+                        child: Text(
+                          widget.object.description,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.black87,
+                            height: 1.6,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Información adicional
+                      if (widget.object.additionalInfo != null &&
+                          widget.object.additionalInfo!.isNotEmpty)
+                        _buildAdditionalInfo(),
+
+                      const SizedBox(height: 24),
+
+                      // Información del departamento
+                      _buildSection(
+                        title: 'Origen',
+                        icon: Icons.place,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Departamento de ${_getDepartmentName(widget.object.departmentId)}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Registrado el ${_formatDate(widget.object.createdAt)}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // Botones de acción
+                      _buildActionButtons(context),
+
+                      const SizedBox(height: 32),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // Avatar flotante de IA (solo si el chat no está abierto)
+          if (!_isChatOpen)
+            FloatingAiAvatar(
+              avatarType: _selectedAvatar,
+              onTap: _toggleChat,
+              isActive: false,
+            ),
+
+          // Chat overlay (cuando está abierto)
+          if (_isChatOpen)
+            Positioned.fill(
+              child: Column(
+                children: [
+                  // Parte superior: vista minimizada del objeto cultural
+                  Expanded(
+                    flex: 1,
+                    child: GestureDetector(
+                      onTap: _closeChat,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black54,
+                              Colors.black26,
+                            ],
+                          ),
+                        ),
+                        child: Stack(
+                          children: [
+                            // Imagen de fondo del objeto
+                            Positioned.fill(
+                              child: SafeNetworkImage(
+                                imageUrl: widget.object.imageUrl,
+                                regionId: widget.object.departmentId,
+                                category: widget.object.category,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            // Overlay oscuro
+                            Positioned.fill(
+                              child: Container(
+                                color: Colors.black.withOpacity(0.6),
+                              ),
+                            ),
+                            // Información del objeto
+                            Positioned.fill(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      widget.object.name,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        shadows: [
+                                          Shadow(
+                                            offset: Offset(0, 1),
+                                            blurRadius: 3,
+                                            color: Colors.black54,
+                                          ),
+                                        ],
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        widget.object.category,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.touch_app,
+                                          color: Colors.white.withOpacity(0.8),
+                                          size: 16,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'Toca para volver al objeto',
+                                          style: TextStyle(
+                                            color:
+                                                Colors.white.withOpacity(0.8),
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Parte inferior: chat
+                  AiChatWidget(
+                    avatarType: _selectedAvatar,
+                    culturalObject: widget.object,
+                    onClose: _closeChat,
+                  ),
                 ],
               ),
             ),
-          ),
         ],
       ),
     );
@@ -218,7 +383,7 @@ class CulturalObjectDetailScreen extends StatelessWidget {
       title: 'Información adicional',
       icon: Icons.info,
       child: Column(
-        children: object.additionalInfo!.entries.map((entry) {
+        children: widget.object.additionalInfo!.entries.map((entry) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(
@@ -419,27 +584,29 @@ class CulturalObjectDetailScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(object.name),
+        title: Text(widget.object.name),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('ID: ${object.id}'),
+              Text('ID: ${widget.object.id}'),
               const SizedBox(height: 8),
-              Text('Categoría: ${object.category}'),
+              Text('Categoría: ${widget.object.category}'),
               const SizedBox(height: 8),
-              Text('Departamento: ${_getDepartmentName(object.departmentId)}'),
+              Text(
+                  'Departamento: ${_getDepartmentName(widget.object.departmentId)}'),
               const SizedBox(height: 8),
-              Text('Fecha de registro: ${_formatDate(object.createdAt)}'),
-              if (object.additionalInfo != null) ...[
+              Text(
+                  'Fecha de registro: ${_formatDate(widget.object.createdAt)}'),
+              if (widget.object.additionalInfo != null) ...[
                 const SizedBox(height: 16),
                 const Text(
                   'Información adicional:',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                ...object.additionalInfo!.entries.map(
+                ...widget.object.additionalInfo!.entries.map(
                   (entry) => Text('${_capitalize(entry.key)}: ${entry.value}'),
                 ),
               ],
@@ -459,7 +626,7 @@ class CulturalObjectDetailScreen extends StatelessWidget {
   void _addToCollection(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${object.name} guardado en tu colección'),
+        content: Text('${widget.object.name} guardado en tu colección'),
         duration: const Duration(seconds: 2),
         action: SnackBarAction(
           label: 'Ver colección',
