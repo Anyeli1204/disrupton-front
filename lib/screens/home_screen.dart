@@ -2,14 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../models/auth_models.dart';
+import '../routes/app_routes.dart';
 import 'login_screen.dart';
-import 'collections_screen.dart';
-import 'admin_dashboard_screen.dart';
-import 'moderator_screen.dart';
-import 'guide_promotions_screen.dart';
-import 'artisan_products_screen.dart';
-import 'events_screen.dart';
-import 'admin_events_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -300,6 +294,27 @@ class HomeScreen extends StatelessWidget {
             'action': 'events',
           },
           {
+            'icon': Icons.museum_outlined,
+            'title': 'Objetos Culturales',
+            'subtitle': 'Explora patrimonio cultural peruano',
+            'color': Colors.teal,
+            'action': 'cultural_objects_feed',
+          },
+          {
+            'icon': Icons.map_outlined,
+            'title': 'Mapa Cultural',
+            'subtitle': 'Descubre lugares cerca de ti',
+            'color': Colors.green,
+            'action': 'cultural_objects_map',
+          },
+          {
+            'icon': Icons.forum_outlined,
+            'title': 'Mural Cultural',
+            'subtitle': 'Participa en la comunidad',
+            'color': Colors.indigo,
+            'action': 'mural',
+          },
+          {
             'icon': Icons.explore_outlined,
             'title': 'Explorar contenido',
             'subtitle': 'Descubre tours y contenido cultural',
@@ -485,66 +500,45 @@ class HomeScreen extends StatelessWidget {
                           onTap: () {
                             switch (function['action']) {
                               case 'collections':
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const CollectionsScreen(),
-                                  ),
-                                );
+                                AppRoutes.pushNamed(
+                                    context, AppRoutes.collections);
                                 break;
                               case 'events':
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const EventsScreen(),
-                                  ),
-                                );
+                                AppRoutes.pushNamed(context, AppRoutes.events);
                                 break;
                               case 'admin_events':
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const AdminEventsScreen(),
-                                  ),
-                                );
+                                AppRoutes.pushNamed(
+                                    context, AppRoutes.adminEvents);
                                 break;
                               case 'admin_dashboard':
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const AdminDashboardScreen(),
-                                  ),
-                                );
+                                AppRoutes.pushNamed(
+                                    context, AppRoutes.adminDashboard);
                                 break;
                               case 'moderator_screen':
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const ModeratorScreen(),
-                                  ),
-                                );
+                                AppRoutes.pushNamed(
+                                    context, AppRoutes.moderator);
                                 break;
                               case 'guide_promotions':
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const GuidePromotionsScreen(),
-                                  ),
-                                );
+                                AppRoutes.pushNamed(
+                                    context, AppRoutes.guidePromotions);
                                 break;
                               case 'artisan_products':
-                                Navigator.push(
+                                AppRoutes.pushNamed(
+                                    context, AppRoutes.artisanProducts);
+                                break;
+                              case 'cultural_objects_feed':
+                                AppRoutes.pushNamed(
+                                    context, AppRoutes.culturalObjectsFeed);
+                                break;
+                              case 'cultural_objects_map':
+                                AppRoutes.pushNamed(
                                   context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const ArtisanProductsScreen(),
-                                  ),
+                                  AppRoutes.culturalObjectsMap,
+                                  arguments: {'culturalObjects': []},
                                 );
+                                break;
+                              case 'mural':
+                                AppRoutes.pushNamed(context, AppRoutes.mural);
                                 break;
                               default:
                                 ScaffoldMessenger.of(context).showSnackBar(

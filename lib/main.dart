@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/collection_provider.dart';
-import 'screens/splash_screen.dart';
+import 'routes/app_routes.dart';
 // import 'package:firebase_core/firebase_core.dart';
 // import 'package:firebase_analytics/firebase_analytics.dart';
 
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => CollectionProvider()),
       ],
       child: MaterialApp(
-        title: 'Disrupton App',
+        title: 'Disrupton App - Cultura Peruana AR',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3: true,
@@ -60,7 +60,9 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        home: const SplashScreen(),
+        initialRoute: AppRoutes.splash,
+        routes: AppRoutes.routes,
+        onGenerateRoute: AppRoutes.generateRoute,
       ),
     );
   }

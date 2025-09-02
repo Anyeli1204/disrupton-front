@@ -13,6 +13,15 @@ class AuthService {
   static const String _userNameKey = 'user_name';
   static const String _userRoleKey = 'user_role';
 
+  // Token en memoria para acceso sincrónico
+  String? _currentToken;
+
+  /// Inicializa el servicio cargando el token desde SharedPreferences
+  Future<void> init() async {
+    final prefs = await SharedPreferences.getInstance();
+    _currentToken = prefs.getString(_tokenKey);
+  }
+
   /// Registra un nuevo usuario
   Future<AuthResponse> register(RegisterRequest request) async {
     try {
@@ -200,6 +209,7 @@ class AuthService {
 
     if (authResponse.token != null) {
       await prefs.setString(_tokenKey, authResponse.token!);
+      _currentToken = authResponse.token!; // También actualizar en memoria
     }
 
     if (authResponse.refreshToken != null) {
@@ -231,6 +241,7 @@ class AuthService {
     await prefs.remove(_userEmailKey);
     await prefs.remove(_userNameKey);
     await prefs.remove(_userRoleKey);
+    _currentToken = null; // También limpiar de memoria
   }
 
   /// Obtiene el rol guardado (o null si aún no se ha elegido)
@@ -268,13 +279,35 @@ class AuthService {
   }
 
   /// Obtiene headers con autenticación para API calls
-  Future<Map<String, String>> getAuthHeaders() async {
-    final token = await getToken();
-    return {
+  Map<String, String> getAuthHeaders() {
+    final token = _currentToken;
+    final headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      if (token != null) 'Authorization': 'Bearer $token',
     };
+
+    if (token != null && token.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+
+    return headers;
+  }
+
+  /// Obtiene headers con autenticación de forma asíncrona (desde storage)
+  Future<Map<String, String>> getAuthHeadersAsync() async {
+    final token = await getToken();
+    final headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+
+    if (token != null && token.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $token';
+      // También actualizar el token en memoria
+      _currentToken = token;
+    }
+
+    return headers;
   }
 
   /// Obtiene el rol del usuario desde el backend

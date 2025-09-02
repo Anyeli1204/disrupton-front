@@ -187,4 +187,14 @@ class AuthProvider extends ChangeNotifier {
     _state = AuthState.error;
     notifyListeners();
   }
+
+  // Obtener headers de autorización
+  Map<String, String> getAuthHeaders() {
+    return _authService.getAuthHeaders();
+  }
+
+  // Obtener headers de autorización de forma asíncrona
+  Future<Map<String, String>> getAuthHeadersAsync() async {
+    return await _authService.getAuthHeadersAsync();
+  }
 }
