@@ -329,6 +329,13 @@ class HomeScreen extends StatelessWidget {
             'action': 'agentes_culturales',
           },
           {
+            'icon': Icons.share_outlined,
+            'title': 'Red Cultural',
+            'subtitle': 'Comparte experiencias y descubrimientos',
+            'color': Colors.orange,
+            'action': 'social_network',
+          },
+          {
             'icon': Icons.explore_outlined,
             'title': 'Explorar contenido',
             'subtitle': 'Descubre tours y contenido cultural',
@@ -560,6 +567,10 @@ class HomeScreen extends StatelessWidget {
                               case 'agentes_culturales':
                                 AppRoutes.pushNamed(
                                     context, AppRoutes.agentesCulturales);
+                                break;
+                              case 'social_network':
+                                AppRoutes.pushNamed(
+                                    context, AppRoutes.socialNetwork);
                                 break;
                               default:
                                 ScaffoldMessenger.of(context).showSnackBar(

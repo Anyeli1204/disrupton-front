@@ -23,9 +23,8 @@ import '../screens/mural_screen.dart';
 import '../screens/agentes_culturales_screen.dart';
 import '../screens/store_screen.dart';
 import '../screens/favorites_screen.dart';
+import '../screens/social_network_screen.dart';
 import '../models/collection_models.dart';
-import '../models/pieza.dart';
-import '../models/event.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -53,6 +52,7 @@ class AppRoutes {
   static const String agentesCulturales = '/agentes-culturales';
   static const String store = '/store';
   static const String favorites = '/favorites';
+  static const String socialNetwork = '/social-network';
 
   static Map<String, WidgetBuilder> get routes {
     return {
@@ -74,6 +74,7 @@ class AppRoutes {
       agentesCulturales: (context) => const AgentesCulturalesScreen(),
       store: (context) => const StoreScreen(),
       favorites: (context) => const FavoritesScreen(),
+      socialNetwork: (context) => const SocialNetworkScreen(),
     };
   }
 
