@@ -48,7 +48,7 @@ class _ProxyImageState extends State<ProxyImage> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(strokeWidth: 2),
             ),
           );
         },
@@ -113,11 +113,17 @@ class _ProxyImageState extends State<ProxyImage> {
             width: widget.width,
             height: widget.height,
             decoration: BoxDecoration(
-              color: Colors.grey[200],
+              color: Colors.grey[300],
               borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey),
             ),
-            child: const Center(
-              child: CircularProgressIndicator(),
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.broken_image, color: Colors.grey, size: 32),
+                Text('Cargando...',
+                    style: TextStyle(color: Colors.grey, fontSize: 12)),
+              ],
             ),
           );
         },

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/collection_provider.dart';
+import 'providers/agentes_culturales_provider.dart';
+import 'providers/favorites_provider.dart';
 import 'routes/app_routes.dart';
 // import 'package:firebase_core/firebase_core.dart';
 // import 'package:firebase_analytics/firebase_analytics.dart';
@@ -21,6 +23,9 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (context) => AuthProvider()),
         ChangeNotifierProvider(create: (context) => CollectionProvider()),
+        ChangeNotifierProvider(
+            create: (context) => AgentesCulturalesProvider()),
+        ChangeNotifierProvider(create: (context) => FavoritesProvider()),
       ],
       child: MaterialApp(
         title: 'Disrupton App - Cultura Peruana AR',

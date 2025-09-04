@@ -287,6 +287,13 @@ class HomeScreen extends StatelessWidget {
             'action': 'collections',
           },
           {
+            'icon': Icons.shopping_bag_outlined,
+            'title': 'Tienda Cultural',
+            'subtitle': 'Productos artesanales y servicios turísticos',
+            'color': Colors.pink,
+            'action': 'store',
+          },
+          {
             'icon': Icons.event_outlined,
             'title': 'Eventos',
             'subtitle': 'Descubre eventos culturales y actividades',
@@ -313,6 +320,13 @@ class HomeScreen extends StatelessWidget {
             'subtitle': 'Participa en la comunidad',
             'color': Colors.indigo,
             'action': 'mural',
+          },
+          {
+            'icon': Icons.people_alt_outlined,
+            'title': 'Agentes Culturales',
+            'subtitle': 'Conecta con artesanos y guías',
+            'color': Colors.amber,
+            'action': 'agentes_culturales',
           },
           {
             'icon': Icons.explore_outlined,
@@ -503,6 +517,9 @@ class HomeScreen extends StatelessWidget {
                                 AppRoutes.pushNamed(
                                     context, AppRoutes.collections);
                                 break;
+                              case 'store':
+                                AppRoutes.pushNamed(context, AppRoutes.store);
+                                break;
                               case 'events':
                                 AppRoutes.pushNamed(context, AppRoutes.events);
                                 break;
@@ -539,6 +556,10 @@ class HomeScreen extends StatelessWidget {
                                 break;
                               case 'mural':
                                 AppRoutes.pushNamed(context, AppRoutes.mural);
+                                break;
+                              case 'agentes_culturales':
+                                AppRoutes.pushNamed(
+                                    context, AppRoutes.agentesCulturales);
                                 break;
                               default:
                                 ScaffoldMessenger.of(context).showSnackBar(

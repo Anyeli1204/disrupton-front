@@ -28,21 +28,14 @@ class MuralService {
   // Obtener comentarios del mural con reacciones
   static Future<List<Comment>> getMuralComments({String? userId}) async {
     try {
-      final activeQuestion = await getActiveMuralQuestion();
       print('=== CARGANDO COMENTARIOS ===');
-      print('Active question: ${activeQuestion?.id}');
 
-      if (activeQuestion == null) {
-        print(
-            'No hay pregunta activa, cargando todos los comentarios del mural');
-        // Si no hay pregunta activa, cargar todos los comentarios del mural
-        return await getAllMuralComments(userId: userId);
-      }
-
+      // 🚀 OPTIMIZACIÓN: Directamente cargar todos los comentarios sin filtrar por pregunta
+      // Esto evita la llamada adicional a getActiveMuralQuestion()
       final authService = AuthService();
-      final headers = authService.getAuthHeaders();
+      final headers = await authService.getAuthHeadersAsync();
 
-      String url = '$baseUrl/api/mural/comentarios/${activeQuestion.id}';
+      String url = '$baseUrl/api/mural/comentarios';
       if (userId != null) {
         url += '?userId=$userId';
       }
@@ -61,6 +54,15 @@ class MuralService {
         final List<dynamic> data = json.decode(response.body);
         final comments = data.map((json) => Comment.fromJson(json)).toList();
         print('Comentarios encontrados: ${comments.length}');
+
+        // Debug de imágenes
+        for (final comment in comments) {
+          if (comment.imageUrls.isNotEmpty) {
+            print(
+                'Comentario ${comment.id} tiene ${comment.imageUrls.length} imágenes: ${comment.imageUrls}');
+          }
+        }
+
         return comments;
       } else {
         throw Exception('Error al obtener comentarios: ${response.statusCode}');

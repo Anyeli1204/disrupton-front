@@ -24,10 +24,28 @@ class _MuralScreenState extends State<MuralScreen> {
   final Set<String> _expandedReplies = {};
   final ImagePicker _imagePicker = ImagePicker();
 
+  // 🚀 OPTIMIZACIÓN: Cache para evitar recargas innecesarias
+  static DateTime? _lastLoadTime;
+  static const Duration _cacheTimeout = Duration(minutes: 2);
+
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _loadDataWithCache();
+  }
+
+  Future<void> _loadDataWithCache() async {
+    // 🚀 Verificar si los datos están en cache y son recientes
+    final now = DateTime.now();
+    if (_lastLoadTime != null &&
+        now.difference(_lastLoadTime!).inMinutes < _cacheTimeout.inMinutes &&
+        _comments.isNotEmpty) {
+      print('📋 Usando datos en cache del mural');
+      return;
+    }
+
+    await _loadData();
+    _lastLoadTime = now;
   }
 
   Future<void> _loadData() async {
@@ -36,13 +54,19 @@ class _MuralScreenState extends State<MuralScreen> {
     });
 
     try {
-      // Cargar pregunta activa del backend
-      final activeQuestion = await MuralService.getActiveMuralQuestion();
-      if (!mounted) return;
-
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final userId = authProvider.currentUser?.userId;
-      final comments = await MuralService.getMuralComments(userId: userId);
+
+      // 🚀 OPTIMIZACIÓN: Ejecutar ambas llamadas en paralelo
+      final results = await Future.wait([
+        MuralService.getActiveMuralQuestion(),
+        MuralService.getMuralComments(userId: userId),
+      ]);
+
+      if (!mounted) return;
+
+      final activeQuestion = results[0] as MuralQuestion?;
+      final comments = results[1] as List<Comment>;
 
       setState(() {
         _comments = comments;
@@ -104,7 +128,30 @@ class _MuralScreenState extends State<MuralScreen> {
 
   Widget _buildWeeklyQuestionTab() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text(
+              'Cargando mural cultural...',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Esto puede tomar unos segundos',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
     if (_questions.isEmpty) {
@@ -135,7 +182,22 @@ class _MuralScreenState extends State<MuralScreen> {
 
   Widget _buildCommentsTab() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text(
+              'Cargando comentarios...',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
     // Filtrar solo comentarios principales (sin parentCommentId)

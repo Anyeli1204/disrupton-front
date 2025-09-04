@@ -20,6 +20,9 @@ import '../screens/artisan_products_screen.dart';
 import '../screens/cultural_objects_feed_screen.dart';
 import '../screens/cultural_objects_map_screen.dart';
 import '../screens/mural_screen.dart';
+import '../screens/agentes_culturales_screen.dart';
+import '../screens/store_screen.dart';
+import '../screens/favorites_screen.dart';
 import '../models/collection_models.dart';
 import '../models/pieza.dart';
 import '../models/event.dart';
@@ -47,6 +50,9 @@ class AppRoutes {
   static const String culturalObjectsFeed = '/cultural-objects-feed';
   static const String culturalObjectsMap = '/cultural-objects-map';
   static const String mural = '/mural';
+  static const String agentesCulturales = '/agentes-culturales';
+  static const String store = '/store';
+  static const String favorites = '/favorites';
 
   static Map<String, WidgetBuilder> get routes {
     return {
@@ -65,6 +71,9 @@ class AppRoutes {
       artisanProducts: (context) => const ArtisanProductsScreen(),
       culturalObjectsFeed: (context) => const CulturalObjectsFeedScreen(),
       mural: (context) => const MuralScreen(),
+      agentesCulturales: (context) => const AgentesCulturalesScreen(),
+      store: (context) => const StoreScreen(),
+      favorites: (context) => const FavoritesScreen(),
     };
   }
 
