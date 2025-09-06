@@ -20,17 +20,17 @@ class ProductCard extends StatelessWidget {
         final isFavorite = favoritesProvider.isFavorite(product.id);
 
         return Card(
-          elevation: 8,
-          margin: const EdgeInsets.all(8),
+          elevation: 6, // Reducido de 8 a 6
+          margin: const EdgeInsets.all(6), // Reducido de 8 a 6
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14), // Reducido de 16 a 14
           ),
           child: InkWell(
             onTap: () => _showProductDetail(context),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14), // Reducido de 16 a 14
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(14), // Reducido de 16 a 14
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -45,7 +45,7 @@ class ProductCard extends StatelessWidget {
                 children: [
                   // Header con categoría y favorito
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(8), // Reducido de 12 a 8
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -137,7 +137,7 @@ class ProductCard extends StatelessWidget {
                   Expanded(
                     flex: 2,
                     child: Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(8), // Reducido de 12 a 8
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -145,21 +145,21 @@ class ProductCard extends StatelessWidget {
                           Text(
                             product.title,
                             style: const TextStyle(
-                              fontSize: 14,
+                              fontSize: 13, // Reducido de 14
                               fontWeight: FontWeight.bold,
                               color: Colors.black87,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 3), // Reducido de 4
 
                           // Artesano
                           if (product.artisanName.isNotEmpty)
                             Text(
                               'Por ${product.artisanName}',
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 10, // Reducido de 11
                                 color: Colors.grey[600],
                                 fontStyle: FontStyle.italic,
                               ),

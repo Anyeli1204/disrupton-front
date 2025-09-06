@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../models/auth_models.dart';
 import '../routes/app_routes.dart';
+import '../config/app_theme.dart';
 import 'login_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -13,7 +14,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Disrupton'),
-        backgroundColor: Colors.deepPurple.shade600,
+        backgroundColor: AppTheme.primaryCeleste,
         foregroundColor: Colors.white,
         actions: [
           Consumer<AuthProvider>(
@@ -74,12 +75,7 @@ class HomeScreen extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.deepPurple.shade600,
-                        Colors.deepPurple.shade400,
-                      ],
-                    ),
+                    gradient: AppTheme.primaryGradient,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Column(
@@ -197,12 +193,12 @@ class HomeScreen extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.orange.shade100,
+                              color: AppTheme.primaryYellow.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
                               Icons.camera_alt,
-                              color: Colors.orange.shade600,
+                              color: AppTheme.primaryYellowDark,
                               size: 32,
                             ),
                           ),
@@ -283,69 +279,69 @@ class HomeScreen extends StatelessWidget {
             'icon': Icons.collections_outlined,
             'title': 'Colecciones',
             'subtitle': 'Explora los 24 departamentos del Perú',
-            'color': Colors.deepPurple,
+            'color': AppTheme.primaryCeleste,
             'action': 'collections',
           },
           {
             'icon': Icons.shopping_bag_outlined,
             'title': 'Tienda Cultural',
             'subtitle': 'Productos artesanales y servicios turísticos',
-            'color': Colors.pink,
+            'color': AppTheme.primaryYellow,
             'action': 'store',
           },
           {
             'icon': Icons.event_outlined,
             'title': 'Eventos',
             'subtitle': 'Descubre eventos culturales y actividades',
-            'color': Colors.orange,
+            'color': AppTheme.primaryCelesteLight,
             'action': 'events',
           },
           {
             'icon': Icons.museum_outlined,
             'title': 'Objetos Culturales',
             'subtitle': 'Explora patrimonio cultural peruano',
-            'color': Colors.teal,
+            'color': AppTheme.primaryYellowLight,
             'action': 'cultural_objects_feed',
           },
           {
             'icon': Icons.map_outlined,
             'title': 'Mapa Cultural',
             'subtitle': 'Descubre lugares cerca de ti',
-            'color': Colors.green,
+            'color': AppTheme.primaryCelesteDark,
             'action': 'cultural_objects_map',
           },
           {
             'icon': Icons.forum_outlined,
             'title': 'Mural Cultural',
             'subtitle': 'Participa en la comunidad',
-            'color': Colors.indigo,
+            'color': AppTheme.primaryYellowDark,
             'action': 'mural',
           },
           {
             'icon': Icons.people_alt_outlined,
             'title': 'Agentes Culturales',
             'subtitle': 'Conecta con artesanos y guías',
-            'color': Colors.amber,
+            'color': const Color(0xFF26A69A),
             'action': 'agentes_culturales',
           },
           {
             'icon': Icons.share_outlined,
             'title': 'Red Cultural',
             'subtitle': 'Comparte experiencias y descubrimientos',
-            'color': Colors.orange,
+            'color': const Color(0xFFFFB74D),
             'action': 'social_network',
           },
           {
             'icon': Icons.explore_outlined,
             'title': 'Explorar contenido',
             'subtitle': 'Descubre tours y contenido cultural',
-            'color': Colors.blue,
+            'color': AppTheme.primaryCeleste,
           },
           {
             'icon': Icons.favorite_outline,
             'title': 'Favoritos',
             'subtitle': 'Guarda tus lugares favoritos',
-            'color': Colors.red,
+            'color': AppTheme.primaryYellow,
           },
         ];
         break;
@@ -355,21 +351,21 @@ class HomeScreen extends StatelessWidget {
             'icon': Icons.dashboard_outlined,
             'title': 'Panel de administración',
             'subtitle': 'Gestiona usuarios y estadísticas',
-            'color': Colors.purple,
+            'color': AppTheme.primaryCeleste,
             'action': 'admin_dashboard',
           },
           {
             'icon': Icons.event_available_outlined,
             'title': 'Gestión de eventos',
             'subtitle': 'Crea y administra eventos culturales',
-            'color': Colors.orange,
+            'color': AppTheme.primaryYellow,
             'action': 'admin_events',
           },
           {
             'icon': Icons.people_outline,
             'title': 'Gestión de usuarios',
             'subtitle': 'Administra roles y permisos',
-            'color': Colors.indigo,
+            'color': AppTheme.primaryCelesteDark,
             'action': 'admin_dashboard',
           },
         ];
@@ -380,21 +376,21 @@ class HomeScreen extends StatelessWidget {
             'icon': Icons.shield_outlined,
             'title': 'Moderación de contenido',
             'subtitle': 'Revisa y aprueba solicitudes',
-            'color': Colors.green,
+            'color': AppTheme.primaryCelesteLight,
             'action': 'moderator_screen',
           },
           {
             'icon': Icons.event_outlined,
             'title': 'Eventos',
             'subtitle': 'Ve eventos culturales y actividades',
-            'color': Colors.orange,
+            'color': AppTheme.primaryYellowLight,
             'action': 'events',
           },
           {
             'icon': Icons.history_outlined,
             'title': 'Historial de moderación',
             'subtitle': 'Revisa decisiones anteriores',
-            'color': Colors.orange.shade600,
+            'color': AppTheme.primaryYellowDark,
             'action': 'moderator_screen',
           },
         ];
@@ -405,21 +401,21 @@ class HomeScreen extends StatelessWidget {
             'icon': Icons.campaign_outlined,
             'title': 'Mis promociones',
             'subtitle': 'Gestiona tours y experiencias',
-            'color': Colors.teal,
+            'color': AppTheme.primaryCeleste,
             'action': 'guide_promotions',
           },
           {
             'icon': Icons.event_outlined,
             'title': 'Eventos',
             'subtitle': 'Descubre eventos para promocionar',
-            'color': Colors.orange,
+            'color': AppTheme.primaryYellow,
             'action': 'events',
           },
           {
             'icon': Icons.add_business_outlined,
             'title': 'Crear promoción',
             'subtitle': 'Diseña nuevas experiencias turísticas',
-            'color': Colors.cyan,
+            'color': AppTheme.primaryCelesteDark,
             'action': 'guide_promotions',
           },
         ];
@@ -430,21 +426,21 @@ class HomeScreen extends StatelessWidget {
             'icon': Icons.inventory_2_outlined,
             'title': 'Mis productos',
             'subtitle': 'Gestiona tu catálogo artesanal',
-            'color': Colors.brown,
+            'color': AppTheme.primaryCelesteLight,
             'action': 'artisan_products',
           },
           {
             'icon': Icons.event_outlined,
             'title': 'Eventos',
             'subtitle': 'Encuentra ferias y eventos artesanales',
-            'color': Colors.orange,
+            'color': AppTheme.primaryYellowLight,
             'action': 'events',
           },
           {
             'icon': Icons.add_shopping_cart_outlined,
             'title': 'Crear producto',
             'subtitle': 'Añade nuevas creaciones',
-            'color': Colors.deepOrange,
+            'color': AppTheme.primaryYellowDark,
             'action': 'artisan_products',
           },
         ];
@@ -455,20 +451,20 @@ class HomeScreen extends StatelessWidget {
             'icon': Icons.star_outline,
             'title': 'Contenido exclusivo',
             'subtitle': 'Accede a experiencias premium',
-            'color': Colors.amber,
+            'color': AppTheme.primaryYellow,
           },
           {
             'icon': Icons.event_outlined,
             'title': 'Eventos VIP',
             'subtitle': 'Eventos exclusivos para miembros premium',
-            'color': Colors.orange,
+            'color': AppTheme.primaryCeleste,
             'action': 'events',
           },
           {
             'icon': Icons.support_agent_outlined,
             'title': 'Soporte VIP',
             'subtitle': 'Atención prioritaria',
-            'color': Colors.yellow.shade700,
+            'color': AppTheme.primaryYellowDark,
           },
         ];
         break;
@@ -484,108 +480,165 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Funciones disponibles',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                Icon(
+                  Icons.apps,
+                  color: AppTheme.primaryCeleste,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'Funciones disponibles',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            ...functions
-                .map((function) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Builder(
-                        builder: (context) => ListTile(
-                          leading: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: function['color'].withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              function['icon'],
-                              color: function['color'],
-                              size: 24,
-                            ),
-                          ),
-                          title: Text(
-                            function['title'],
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          subtitle: Text(function['subtitle']),
-                          trailing:
-                              const Icon(Icons.arrow_forward_ios, size: 16),
-                          onTap: () {
-                            switch (function['action']) {
-                              case 'collections':
-                                AppRoutes.pushNamed(
-                                    context, AppRoutes.collections);
-                                break;
-                              case 'store':
-                                AppRoutes.pushNamed(context, AppRoutes.store);
-                                break;
-                              case 'events':
-                                AppRoutes.pushNamed(context, AppRoutes.events);
-                                break;
-                              case 'admin_events':
-                                AppRoutes.pushNamed(
-                                    context, AppRoutes.adminEvents);
-                                break;
-                              case 'admin_dashboard':
-                                AppRoutes.pushNamed(
-                                    context, AppRoutes.adminDashboard);
-                                break;
-                              case 'moderator_screen':
-                                AppRoutes.pushNamed(
-                                    context, AppRoutes.moderator);
-                                break;
-                              case 'guide_promotions':
-                                AppRoutes.pushNamed(
-                                    context, AppRoutes.guidePromotions);
-                                break;
-                              case 'artisan_products':
-                                AppRoutes.pushNamed(
-                                    context, AppRoutes.artisanProducts);
-                                break;
-                              case 'cultural_objects_feed':
-                                AppRoutes.pushNamed(
-                                    context, AppRoutes.culturalObjectsFeed);
-                                break;
-                              case 'cultural_objects_map':
-                                AppRoutes.pushNamed(
-                                  context,
-                                  AppRoutes.culturalObjectsMap,
-                                  arguments: {'culturalObjects': []},
-                                );
-                                break;
-                              case 'mural':
-                                AppRoutes.pushNamed(context, AppRoutes.mural);
-                                break;
-                              case 'agentes_culturales':
-                                AppRoutes.pushNamed(
-                                    context, AppRoutes.agentesCulturales);
-                                break;
-                              case 'social_network':
-                                AppRoutes.pushNamed(
-                                    context, AppRoutes.socialNetwork);
-                                break;
-                              default:
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                        '${function['title']} próximamente disponible'),
-                                  ),
-                                );
-                            }
-                          },
-                        ),
-                      ),
-                    ))
-                .toList(),
+            const SizedBox(height: 20),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, // 2 columnas
+                childAspectRatio:
+                    1.3, // Proporción más horizontal para dar más espacio
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+              ),
+              itemCount: functions.length,
+              itemBuilder: (context, index) {
+                final function = functions[index];
+                return _buildFunctionCard(context, function);
+              },
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFunctionCard(
+      BuildContext context, Map<String, dynamic> function) {
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: InkWell(
+        onTap: () {
+          switch (function['action']) {
+            case 'collections':
+              AppRoutes.pushNamed(context, AppRoutes.collections);
+              break;
+            case 'store':
+              AppRoutes.pushNamed(context, AppRoutes.store);
+              break;
+            case 'events':
+              AppRoutes.pushNamed(context, AppRoutes.events);
+              break;
+            case 'admin_events':
+              AppRoutes.pushNamed(context, AppRoutes.adminEvents);
+              break;
+            case 'admin_dashboard':
+              AppRoutes.pushNamed(context, AppRoutes.adminDashboard);
+              break;
+            case 'moderator_screen':
+              AppRoutes.pushNamed(context, AppRoutes.moderator);
+              break;
+            case 'guide_promotions':
+              AppRoutes.pushNamed(context, AppRoutes.guidePromotions);
+              break;
+            case 'artisan_products':
+              AppRoutes.pushNamed(context, AppRoutes.artisanProducts);
+              break;
+            case 'cultural_objects_feed':
+              AppRoutes.pushNamed(context, AppRoutes.culturalObjectsFeed);
+              break;
+            case 'cultural_objects_map':
+              AppRoutes.pushNamed(
+                context,
+                AppRoutes.culturalObjectsMap,
+                arguments: {'culturalObjects': []},
+              );
+              break;
+            case 'mural':
+              AppRoutes.pushNamed(context, AppRoutes.mural);
+              break;
+            case 'agentes_culturales':
+              AppRoutes.pushNamed(context, AppRoutes.agentesCulturales);
+              break;
+            case 'social_network':
+              AppRoutes.pushNamed(context, AppRoutes.socialNetwork);
+              break;
+            default:
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${function['title']} próximamente disponible'),
+                  backgroundColor: AppTheme.primaryCeleste,
+                ),
+              );
+          }
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(12), // Reducido de 16 a 12
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                function['color'].withOpacity(0.1),
+                function['color'].withOpacity(0.05),
+              ],
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min, // Añadido para minimizar el espacio
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8), // Reducido de 12 a 8
+                decoration: BoxDecoration(
+                  color: function['color'].withOpacity(0.15),
+                  borderRadius:
+                      BorderRadius.circular(10), // Reducido de 12 a 10
+                ),
+                child: Icon(
+                  function['icon'],
+                  color: function['color'],
+                  size: 24, // Reducido de 28 a 24
+                ),
+              ),
+              const SizedBox(height: 8), // Reducido de 12 a 8
+              Text(
+                function['title'],
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12, // Reducido de 13 a 12
+                  color: AppTheme.textPrimary,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2), // Reducido de 4 a 2
+              Text(
+                function['subtitle'],
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 9, // Reducido de 10 a 9
+                  color: AppTheme.textSecondary,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ),
     );

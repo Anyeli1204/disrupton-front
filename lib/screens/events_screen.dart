@@ -364,9 +364,10 @@ class _EventsScreenState extends State<EventsScreen> {
               // Contenido del evento
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: const EdgeInsets.all(8.0), // Reducido de 12 a 8
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min, // Añadido para minimizar espacio
                     children: [
                       // Título
                       Text(
@@ -374,22 +375,23 @@ class _EventsScreenState extends State<EventsScreen> {
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 14, // Reducido el tamaño de fuente
                                 ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 3), // Reducido de 4 a 3
 
                       // Fecha y tiempo restante
                       Row(
                         children: [
                           Icon(
                             event.isPastEvent ? Icons.history : Icons.schedule,
-                            size: 16,
+                            size: 14, // Reducido de 16 a 14
                             color:
                                 event.isPastEvent ? Colors.grey : Colors.orange,
                           ),
-                          const SizedBox(width: 4),
+                          const SizedBox(width: 3), // Reducido de 4 a 3
                           Expanded(
                             child: Text(
                               event.isPastEvent
@@ -403,26 +405,29 @@ class _EventsScreenState extends State<EventsScreen> {
                                         ? Colors.grey
                                         : Colors.orange,
                                     fontWeight: FontWeight.w500,
+                                    fontSize: 11, // Reducido el tamaño de fuente
                                   ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 3), // Reducido de 4 a 3
 
                       // Ubicación
                       Row(
                         children: [
                           const Icon(
                             Icons.location_on,
-                            size: 16,
+                            size: 14, // Reducido de 16 a 14
                             color: Colors.grey,
                           ),
-                          const SizedBox(width: 4),
+                          const SizedBox(width: 3), // Reducido de 4 a 3
                           Expanded(
                             child: Text(
                               event.location,
-                              style: Theme.of(context).textTheme.bodySmall,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                fontSize: 11, // Añadido tamaño de fuente más pequeño
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -435,13 +440,13 @@ class _EventsScreenState extends State<EventsScreen> {
                       // Tags
                       if (event.tags.isNotEmpty)
                         Wrap(
-                          spacing: 4,
+                          spacing: 3, // Reducido de 4 a 3
                           children: event.tags
                               .take(2)
                               .map((tag) => Chip(
                                     label: Text(
                                       tag,
-                                      style: const TextStyle(fontSize: 10),
+                                      style: const TextStyle(fontSize: 9), // Reducido de 10 a 9
                                     ),
                                     backgroundColor:
                                         Colors.orange.withOpacity(0.1),

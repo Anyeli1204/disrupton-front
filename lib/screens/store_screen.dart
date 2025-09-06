@@ -628,12 +628,12 @@ class _StoreScreenState extends State<StoreScreen>
     }
 
     return GridView.builder(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(8), // Reducido de 12 a 8
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 0.75,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
+        childAspectRatio: 0.8, // Aumentado ligeramente de 0.75 a 0.8
+        crossAxisSpacing: 6, // Reducido de 8 a 6
+        mainAxisSpacing: 6, // Reducido de 8 a 6
       ),
       itemCount: _filteredProducts.length,
       itemBuilder: (context, index) {
@@ -686,12 +686,12 @@ class _StoreScreenState extends State<StoreScreen>
     }
 
     return GridView.builder(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(8), // Reducido de 12 a 8
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 0.7,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
+        childAspectRatio: 0.75, // Aumentado ligeramente de 0.7 a 0.75
+        crossAxisSpacing: 6, // Reducido de 8 a 6
+        mainAxisSpacing: 6, // Reducido de 8 a 6
       ),
       itemCount: _filteredServices.length,
       itemBuilder: (context, index) {

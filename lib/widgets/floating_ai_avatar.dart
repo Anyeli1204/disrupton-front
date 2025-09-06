@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/ai_chat_models.dart';
+import '../config/app_theme.dart';
 
 class FloatingAiAvatar extends StatefulWidget {
   final AvatarType avatarType;
@@ -98,15 +99,15 @@ class _FloatingAiAvatarState extends State<FloatingAiAvatar>
                     ),
                     if (!widget.isActive)
                       BoxShadow(
-                        color: Colors.deepPurple.withOpacity(0.3),
+                        color: AppTheme.primaryCeleste.withOpacity(0.3),
                         blurRadius: 20 * _pulseAnimation.value,
                         spreadRadius: 2 * _pulseAnimation.value,
                       ),
                   ],
                   border: Border.all(
                     color: widget.isActive
-                        ? Colors.deepPurple.shade600
-                        : Colors.deepPurple.shade300,
+                        ? AppTheme.primaryCeleste
+                        : AppTheme.primaryCelesteLight,
                     width: widget.isActive ? 3 : 2,
                   ),
                 ),
@@ -148,7 +149,7 @@ class _FloatingAiAvatarState extends State<FloatingAiAvatar>
                         child: Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.deepPurple.withOpacity(0.1),
+                            color: AppTheme.primaryCeleste.withOpacity(0.1),
                           ),
                         ),
                       ),
