@@ -51,5 +51,11 @@
 	<string>Esta aplicación necesita acceso a la ubicación para funcionalidades de AR</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Esta aplicación necesita acceso al micrófono para audio en realidad aumentada</string>
+
+	<!-- Photo Library permissions for selecting images from gallery -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Esta aplicación necesita acceder a tu biblioteca de fotos para adjuntar imágenes a los comentarios.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Esta aplicación necesita permiso para guardar imágenes capturadas en tu biblioteca de fotos.</string>
 </dict>
 </plist>

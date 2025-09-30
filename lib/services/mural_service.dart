@@ -8,20 +8,6 @@ import '../models/mural_question.dart';
 import '../models/user.dart';
 import 'auth_service.dart';
 
-// Helper method para parsear Firestore Timestamp
-DateTime _parseFirestoreTimestamp(dynamic timestamp) {
-  if (timestamp is Map<String, dynamic>) {
-    final seconds = timestamp['seconds'] as int?;
-    if (seconds != null) {
-      return DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
-    }
-  }
-  if (timestamp is String) {
-    return DateTime.parse(timestamp);
-  }
-  return DateTime.now();
-}
-
 class MuralService {
   static const String baseUrl = AppConfig.baseUrl;
   
@@ -88,13 +74,15 @@ class MuralService {
         'Content-Type': 'application/json',
       }..addAll(authHeaders);
 
-      final body = <String, dynamic>{
+      final Map<String, dynamic> body = {
         'text': text,
         'userId': userId,
-        'preguntaId': questionId,
+        if (questionId != null) 'preguntaId': questionId,
+        if (parentCommentId != null) 'parentId': parentCommentId,
       };
       
       if (imageUrls != null && imageUrls.isNotEmpty) {
+        // Enviar solo imageUrls, el backend rechaza 'imagenes'
         body['imageUrls'] = imageUrls;
       }
       
@@ -116,19 +104,11 @@ class MuralService {
           // Si fue aprobado, usar los datos del comentario guardado
           final commentData = data['commentData'];
           if (commentData != null) {
-            return Comment(
-              id: commentData['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
-              text: commentData['text'] ?? text,
-              userId: commentData['userId'] ?? userId,
-              userName: user?.name ?? 'Usuario',
-              parentCommentId: commentData['parentCommentId'] ?? parentCommentId,
-              createdAt: commentData['createdAt'] != null 
-                  ? _parseFirestoreTimestamp(commentData['createdAt'])
-                  : DateTime.now(),
-              likes: [],
-              dislikes: [],
-              isEdited: false,
-              imageUrls: imageUrls ?? [],
+            // Usar el objeto devuelto por el backend para preservar URLs
+            final backendComment = Comment.fromJson(Map<String, dynamic>.from(commentData));
+            // Asegurar userName si backend no lo incluye
+            return backendComment.copyWith(
+              userName: backendComment.userName ?? user?.name ?? 'Usuario',
             );
           } else {
             // Fallback si no hay commentData

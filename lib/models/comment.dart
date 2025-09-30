@@ -64,14 +64,43 @@ class Comment {
       isDeleted: json['isDeleted'] ?? false,
       metadata: json['metadata'],
       imageUrls: (() {
-        // Soportar distintos nombres de campo provenientes del backend
-        final dynamic v = json['imageUrls'] ?? json['imagenes'] ?? json['downloadUrls'];
+        // Soportar distintos nombres y formatos del backend
+        final dynamic v = json['imageUrls'] ?? json['imagenes'] ?? json['downloadUrls'] ?? json['images'];
+        List<String> urls = [];
         if (v is List) {
-          return List<String>.from(v);
+          for (final item in v) {
+            if (item is String) {
+              final s = item.trim();
+              if (s.isNotEmpty) urls.add(s);
+            } else if (item is Map<String, dynamic>) {
+              // Intentar varias llaves comunes
+              final candidates = [
+                item['url'],
+                item['downloadUrl'],
+                item['downloadURL'],
+                item['path'],
+              ];
+              for (final c in candidates) {
+                if (c is String && c.trim().isNotEmpty) {
+                  urls.add(c.trim());
+                  break;
+                }
+              }
+            } else {
+              // Fallback: toString si parece URL
+              final s = item.toString();
+              if (s.startsWith('http')) urls.add(s);
+            }
+          }
+          return urls;
         }
         if (v is String) {
-          // Permitir string separado por comas
-          return v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+          // Permitir string separado por comas o un único URL
+          return v
+              .split(',')
+              .map((e) => e.trim())
+              .where((e) => e.isNotEmpty)
+              .toList();
         }
         return <String>[];
       })(),

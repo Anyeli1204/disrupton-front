@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'cultural_agents_screen.dart';
 import 'mural_screen.dart';
-import 'ar_view_screen.dart';
-import '../models/pieza.dart';
+import '../widgets/onirix_ar_view.dart';
+import '../routes/app_routes.dart';
+import '../providers/auth_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,19 +16,30 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<AuthProvider>().currentUser;
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('DISRUPTON'),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              context.read<AuthProvider>().logout();
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Banner de bienvenida
+            // Welcome Banner
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(24),
@@ -53,22 +66,22 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              '¡Bienvenido a DISRUPTON!',
-                              style: TextStyle(
-                                fontSize: 24,
+                            Text(
+                              '¡Hola, ${user?.name ?? 'Usuario'}!',
+                              style: const TextStyle(
+                                fontSize: 22,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
                             ),
-                            const SizedBox(height: 8),
-                                                         Text(
-                               'Realidad Aumentada para Exploración Cultural',
-                               style: TextStyle(
-                                 fontSize: 16,
-                                 color: Colors.white.withValues(alpha: 0.9),
-                               ),
-                             ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              'Explora la cultura con realidad aumentada',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -80,9 +93,9 @@ class _HomeScreenState extends State<HomeScreen> {
             
             const SizedBox(height: 32),
             
-            // Sección de funcionalidades principales
+            // Main Features Section
             const Text(
-              'Funcionalidades Principales',
+              'Funcionalidades',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -90,53 +103,53 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             
-            // Grid de funcionalidades
+            // Features Grid
             GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               crossAxisCount: 2,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              childAspectRatio: 1.6, // Aumentar aún más el ratio
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childAspectRatio: 1.0,
               children: [
                 _buildFeatureCard(
                   icon: Icons.view_in_ar,
                   title: 'Realidad Aumentada',
-                  subtitle: 'Explora piezas culturales en 3D',
+                  subtitle: 'Explora modelos 3D',
                   color: Colors.deepPurple,
-                  onTap: () => _navigateToAR(),
+                  onTap: _navigateToAR,
                 ),
                 _buildFeatureCard(
                   icon: Icons.people,
                   title: 'Agentes Culturales',
-                  subtitle: 'Conoce artesanos y guías',
+                  subtitle: 'Conoce a los creadores',
                   color: Colors.orange,
-                  onTap: () => _navigateToCulturalAgents(),
+                  onTap: _navigateToCulturalAgents,
                 ),
                 _buildFeatureCard(
                   icon: Icons.forum,
-                  title: 'Mural Cultural',
-                  subtitle: 'Participa en la comunidad',
+                  title: 'Mural',
+                  subtitle: 'Comunidad cultural',
                   color: Colors.green,
-                  onTap: () => _navigateToMural(),
+                  onTap: _navigateToMural,
                 ),
                 _buildFeatureCard(
-                  icon: Icons.explore,
-                  title: 'Explorar',
-                  subtitle: 'Descubre más funcionalidades',
+                  icon: Icons.camera_alt,
+                  title: 'Escanear 3D',
+                  subtitle: 'Digitaliza objetos',
                   color: Colors.blue,
-                  onTap: () => _showComingSoon(),
+                  onTap: _navigateToObjectScan,
                 ),
               ],
             ),
             
             const SizedBox(height: 32),
             
-            // Sección de información adicional
+            // Additional Info Section
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.grey[50],
                 borderRadius: BorderRadius.circular(16),
@@ -145,31 +158,19 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: Colors.deepPurple[600],
-                        size: 24,
-                      ),
-                      const SizedBox(width: 12),
-                      const Text(
-                        'Acerca de DISRUPTON',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                  const Text(
+                    'Explora la cultura',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
                   Text(
-                    'DISRUPTON es una plataforma innovadora que combina realidad aumentada con exploración cultural. '
-                    'Descubre piezas históricas en 3D, conecta con agentes culturales y participa en nuestra comunidad virtual.',
+                    'Descubre piezas culturales en realidad aumentada y conecta con la comunidad de creadores.',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[700],
-                      height: 1.5,
+                      color: Colors.grey[600],
                     ),
                   ),
                 ],
@@ -189,47 +190,47 @@ class _HomeScreenState extends State<HomeScreen> {
     required VoidCallback onTap,
   }) {
     return Card(
-      elevation: 4,
+      elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(8), // Reducir aún más el padding
+        child: Container(
+          padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(6), // Reducir aún más el padding del icono
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(6),
+                  shape: BoxShape.circle,
                 ),
                 child: Icon(
                   icon,
-                  size: 20, // Reducir aún más el tamaño del icono
+                  size: 28,
                   color: color,
                 ),
               ),
-              const SizedBox(height: 6), // Reducir aún más el espaciado
+              const SizedBox(height: 12),
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 12, // Reducir aún más el tamaño de fuente
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
                 textAlign: TextAlign.center,
-                maxLines: 1,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 2), // Reducir aún más el espaciado
+              const SizedBox(height: 4),
               Text(
                 subtitle,
                 style: TextStyle(
-                  fontSize: 9, // Reducir aún más el tamaño de fuente
+                  fontSize: 12,
                   color: Colors.grey[600],
                 ),
                 textAlign: TextAlign.center,
@@ -244,25 +245,28 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _navigateToAR() {
-    // Crear una pieza de ejemplo para probar
-    final piezaEjemplo = Pieza(
-      id: '1',
-      nombre: 'Pieza Demo',
-      descripcion: 'Una pieza de ejemplo para probar la funcionalidad AR',
-      urlModelo3D: 'https://ejemplo.com/modelo.gltf',
-      urlImagen: 'https://ejemplo.com/imagen.jpg',
-      categoria: 'Demo',
-      epoca: 'Época moderna',
-      ubicacion: 'Museo Virtual',
-      escala: 1.0,
-      posicionInicial: [0.0, 0.0, -0.5],
-      rotacionInicial: [0.0, 0.0, 0.0],
-    );
-
-    Navigator.push(
-      context,
+    Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => ARViewScreen(pieza: piezaEjemplo),
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: const Text('Experiencia AR'),
+            backgroundColor: Colors.deepPurple,
+            foregroundColor: Colors.white
+          ),
+          body: OnirixARView(
+            accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjc2ODQ5LCJwcm9qZWN0SWQiOjEyNDAyMSwicm9sZSI6MywiaWF0IjoxNzU5MDMxMzg5fQ.p3bL68IkSTfVbZDEvHEr5ohpS5moyI4JOSBoEC9u6hk',
+            onError: (error) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Error: $error'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+          ),
+        ),
       ),
     );
   }
@@ -285,12 +289,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _showComingSoon() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('¡Más funcionalidades próximamente!'),
-        backgroundColor: Colors.blue,
-      ),
-    );
+  void _navigateToObjectScan() {
+    Navigator.pushNamed(context, AppRoutes.objectScan);
   }
+  
 }

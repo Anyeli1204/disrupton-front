@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:ar_flutter_plugin_updated/ar_flutter_plugin.dart';
 import 'package:ar_flutter_plugin_updated/datatypes/node_types.dart';
@@ -78,37 +80,96 @@ class _ARViewScreenState extends State<ARViewScreen> {
   }
 
   Future<void> _cargarModelo3D() async {
+    if (!mounted) return;
+    
     try {
+      // Mostrar indicador de carga
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cargando modelo 3D...'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      
+      debugPrint('Iniciando carga del modelo para la pieza: ${widget.pieza.nombre}');
+      debugPrint('URL del modelo: ${widget.pieza.urlModelo3D}');
+      
+      // Cargar el modelo desde la URL
       final modelPath = await ModelLoader.cargarModeloDesdeUrl(
         widget.pieza.urlModelo3D,
         widget.pieza.id,
       );
 
-      if (modelPath != null) {
-        final newNode = ARNode(
-          type: NodeType.localGLTF2,
-          uri: modelPath,
-          scale: Vector3.all(widget.pieza.escala),
-          position: Vector3(
-            widget.pieza.posicionInicial[0],
-            widget.pieza.posicionInicial[1],
-            widget.pieza.posicionInicial[2],
-          ),
-          rotation: Vector4(
-            widget.pieza.rotacionInicial[0],
-            widget.pieza.rotacionInicial[1],
-            widget.pieza.rotacionInicial[2],
-            1.0,
+      if (!mounted) return;
+      
+      if (modelPath == null) {
+        throw Exception('No se pudo cargar el modelo 3D. Verifica tu conexión a Internet.');
+      }
+      
+      debugPrint('Modelo cargado correctamente en: $modelPath');
+      
+      // Verificar que el archivo existe
+      final modelFile = File(modelPath);
+      final fileExists = await modelFile.exists();
+      
+      if (!fileExists) {
+        throw Exception('El archivo del modelo no se encontró en la ruta: $modelPath');
+      }
+      
+      // Crear el nodo AR
+      final newNode = ARNode(
+        type: NodeType.localGLTF2,
+        uri: modelPath,
+        scale: Vector3.all(widget.pieza.escala),
+        position: Vector3(
+          widget.pieza.posicionInicial[0],
+          widget.pieza.posicionInicial[1],
+          widget.pieza.posicionInicial[2],
+        ),
+        rotation: Vector4(
+          widget.pieza.rotacionInicial[0],
+          widget.pieza.rotacionInicial[1],
+          widget.pieza.rotacionInicial[2],
+          1.0,
+        ),
+      );
+
+      // Añadir el nodo a la escena AR
+      final didAddNodeSuccess = await arObjectManager.addNode(newNode);
+      
+      if (!mounted) return;
+      
+      if (didAddNodeSuccess == true) {
+        nodes.add(newNode);
+        debugPrint('Modelo 3D agregado correctamente a la escena AR');
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Modelo 3D cargado correctamente'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
           ),
         );
-
-        bool? didAddNodeSuccess = await arObjectManager.addNode(newNode);
-        if (didAddNodeSuccess!) {
-          nodes.add(newNode);
-        }
+      } else {
+        throw Exception('No se pudo agregar el modelo a la escena AR');
       }
     } catch (e) {
-      debugPrint('Error cargando modelo 3D: $e');
+      debugPrint('❌ Error cargando modelo 3D: $e');
+      
+      if (!mounted) return;
+      
+      // Mostrar mensaje de error al usuario
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al cargar el modelo 3D: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+          action: SnackBarAction(
+            label: 'Reintentar',
+            onPressed: _cargarModelo3D,
+          ),
+        ),
+      );
     }
   }
 

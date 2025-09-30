@@ -116,13 +116,17 @@ class ARProvider with ChangeNotifier {
 
   // Limpiar caché de modelos
   Future<void> limpiarCache() async {
+    _setLoading(true);
     try {
       await ModelLoader.limpiarCache();
       _modelLoaded = false;
+      _error = null;
       notifyListeners();
     } catch (e) {
       _error = 'Error limpiando caché: $e';
-      notifyListeners();
+      rethrow;
+    } finally {
+      _setLoading(false);
     }
   }
 

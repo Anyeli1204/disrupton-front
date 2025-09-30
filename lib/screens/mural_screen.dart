@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../models/mural_question.dart';
 import '../models/comment.dart';
 import '../services/mural_service.dart';
@@ -27,6 +27,43 @@ class _MuralScreenState extends State<MuralScreen> {
   void initState() {
     super.initState();
     _loadData();
+  }
+
+  // Permisos
+  Future<bool> _ensureGalleryPermission() async {
+    // Android 13+: READ_MEDIA_IMAGES (Permission.photos)
+    // Android <=12: READ_EXTERNAL_STORAGE (Permission.storage)
+    // iOS: Permission.photos
+    if (Platform.isAndroid) {
+      var statusPhotos = await Permission.photos.status;
+      var statusStorage = await Permission.storage.status;
+      if (!statusPhotos.isGranted) {
+        statusPhotos = await Permission.photos.request();
+      }
+      if (!statusStorage.isGranted) {
+        statusStorage = await Permission.storage.request();
+      }
+      final granted = statusPhotos.isGranted || statusStorage.isGranted;
+      if (!granted && (statusPhotos.isPermanentlyDenied || statusStorage.isPermanentlyDenied)) {
+        await openAppSettings();
+      }
+      return granted;
+    } else if (Platform.isIOS) {
+      var status = await Permission.photos.status;
+      if (!status.isGranted) {
+        status = await Permission.photos.request();
+      }
+      if (!status.isGranted && status.isPermanentlyDenied) {
+        await openAppSettings();
+      }
+      return status.isGranted;
+    }
+    return true;
+  }
+
+  Future<bool> _ensureCameraPermission() async {
+    final status = await Permission.camera.request();
+    return status.isGranted;
   }
 
   Future<void> _loadData() async {
@@ -655,6 +692,9 @@ class _MuralScreenState extends State<MuralScreen> {
                 imageUrls[index],
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
+                  // Debug: registrar URL y error cuando falle la carga
+                  // ignore: avoid_print
+                  print('Image load error for URL: ${imageUrls[index]} -> $error');
                   return Container(
                     color: Colors.grey[300],
                     child: const Icon(
@@ -869,9 +909,33 @@ class _MuralScreenState extends State<MuralScreen> {
                     user.userId, 
                     tempCommentId
                   );
+                  if (imageUrls.isNotEmpty) {
+                    // Debug: mostrar primera URL subida
+                    final first = imageUrls.first;
+                    // ignore: avoid_print
+                    print('Uploaded image URL: $first');
+                    scaffoldMessenger.showSnackBar(
+                      SnackBar(
+                        content: Text('Imagen subida: ${first.length > 60 ? '${first.substring(0, 60)}...' : first}'),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  }
                 }
 
                 final authHeaders = authProvider.getAuthHeaders();
+                // Si el usuario seleccionó imágenes pero no obtuvimos URLs válidas, no crear el comentario
+                if (selectedImages.isNotEmpty && (imageUrls == null || imageUrls.isEmpty)) {
+                  if (mounted) {
+                    scaffoldMessenger.showSnackBar(
+                      const SnackBar(
+                        content: Text('No se pudo obtener la URL de la imagen. Revisa permisos de galería/almacenamiento e inténtalo de nuevo.'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                  return;
+                }
                 final newComment = await MuralService.createMuralComment(
                   commentController.text.trim(),
                   user.userId,
@@ -914,6 +978,19 @@ class _MuralScreenState extends State<MuralScreen> {
 
   Future<void> _selectImages(StateSetter setDialogState, List<File> selectedImages) async {
     try {
+      // Solicitar permisos para fotos/almacenamiento según versión
+      final granted = await _ensureGalleryPermission();
+      if (!granted) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Permiso denegado: no se puede acceder a la galería'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
       // Usar selección individual desde galería para mayor compatibilidad
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.gallery,
@@ -961,6 +1038,19 @@ class _MuralScreenState extends State<MuralScreen> {
 
   Future<void> _selectImageFromCamera(StateSetter setDialogState, List<File> selectedImages) async {
     try {
+      // Solicitar permisos de cámara
+      final granted = await _ensureCameraPermission();
+      if (!granted) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Permiso de cámara denegado'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.camera,
         maxWidth: 1920,
