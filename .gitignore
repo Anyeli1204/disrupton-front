@@ -1,4 +1,8 @@
-# Flutter/Dart specific
+# ============================================
+# FLUTTER PROJECT - .gitignore
+# ============================================
+
+# -------------------- Flutter/Dart --------------------
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
@@ -8,7 +12,28 @@
 build/
 *.lock
 
-# Android
+# -------------------- SENSITIVE FILES --------------------
+# 🔒 Firebase Configuration (CONTIENE API KEYS)
+lib/firebase_options.dart
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+firebase.json
+
+# 🔒 Environment variables
+.env
+.env.local
+.env.*.local
+lib/config/app_config.dart
+
+# 🔒 API Keys y secrets
+**/secrets/
+**/credentials/
+**/*.pem
+**/*.p12
+**/*.jks
+**/*.keystore
+
+# -------------------- Android --------------------
 **/android/**/gradle-wrapper.jar
 **/android/.gradle
 **/android/captures/
@@ -16,8 +41,12 @@ build/
 **/android/gradlew.bat
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
+**/android/key.properties
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
 
-# iOS
+# -------------------- iOS --------------------
 **/ios/**/*.mode1v3
 **/ios/**/*.mode2v3
 **/ios/**/*.moved-aside
@@ -45,17 +74,39 @@ build/
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
 
-# Web
+# -------------------- Web --------------------
 **/web/firebase_options.dart
 
-# IDE
+# -------------------- Backend (Spring Boot) --------------------
+**/disrupton-back/target/
+**/disrupton-back/.mvn/
+**/disrupton-back/mvnw
+**/disrupton-back/mvnw.cmd
+**/disrupton-back/HELP.md
+**/disrupton-back/.gradle/
+**/disrupton-back/build/
+**/disrupton-back/out/
+
+# 🔒 Backend sensitive files
+**/disrupton-back/src/main/resources/application-*.yml
+**/disrupton-back/src/main/resources/application-*.properties
+**/disrupton-back/src/main/resources/firebase-service-account.json
+**/disrupton-back/.env
+
+# -------------------- IDE --------------------
 .vscode/
 .idea/
 *.iml
 *.ipr
 *.iws
+.classpath
+.project
+.settings/
+*.swp
+*.swo
+*~
 
-# OS
+# -------------------- OS --------------------
 .DS_Store
 .DS_Store?
 ._*
@@ -63,10 +114,50 @@ build/
 .Trashes
 ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# Flutter SDK (exclude the downloaded Flutter SDK)
+# -------------------- Node/NPM --------------------
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# -------------------- Flutter SDK --------------------
 flutter/
 
-# Temporary files
+# -------------------- Logs & Debug --------------------
+*.log
+*.logs
+*.stackdump
+crash-reports/
+
+# -------------------- Temporary files --------------------
 *.tmp
 *.temp
+*.bak
+*.swp
+*.swo
+*~.nib
+
+# -------------------- Coverage --------------------
+coverage/
+*.lcov
+.test_coverage/
+
+# -------------------- Generated files --------------------
+*.g.dart
+*.freezed.dart
+*.gr.dart
+*.config.dart
+
+# -------------------- Local database --------------------
+*.db
+*.sqlite
+*.sqlite3
+
+# -------------------- APK/Bundle outputs --------------------
+*.apk
+*.aab
+*.ipa
