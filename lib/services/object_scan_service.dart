@@ -380,40 +380,40 @@ Future<String> downloadModelFile(String downloadUrl, String serial) async {
   
   Future<String> processImagesAndGetModel(
     List<File> imageFiles, {
-    String? objectName,
+    required CulturalObjectRequest culturalObjectData,
     Function(String)? onStatusUpdate,
   }) async {
     try {
       onStatusUpdate?.call('Subiendo imágenes...');
       final uploadResult = await uploadImages(
         imageFiles,
-        objectName: objectName,
+        objectName: culturalObjectData.name,
         fileFormat: 'GLB',
       );
-      
+
       String serial;
       if (uploadResult['data'] != null && uploadResult['data']['serialize'] != null) {
         serial = uploadResult['data']['serialize'];
       } else {
         throw Exception('No se pudo obtener el ID del modelo de la respuesta');
       }
-      
+
       print('✅ Upload successful. Serial: $serial');
-      
+
       onStatusUpdate?.call('Procesando modelo 3D...');
       bool isReady = false;
       int attempts = 0;
       const maxAttempts = 60;
-      
+
       while (!isReady && attempts < maxAttempts) {
         await Future.delayed(const Duration(seconds: 30));
         attempts++;
-        
+
         try {
           final statusResult = await getModelStatus(serial);
           print('🔍 Processing status: $statusResult');
-          
-          if (statusResult['status'] == 'completed' || 
+
+          if (statusResult['status'] == 'completed' ||
               statusResult['ready'] == true ||
               statusResult['state'] == 'FINISHED') {
             isReady = true;
@@ -431,15 +431,15 @@ Future<String> downloadModelFile(String downloadUrl, String serial) async {
           }
         }
       }
-      
+
       if (!isReady) {
         throw Exception('Timeout: El modelo no estuvo listo en 30 minutos');
       }
-      
+
       final downloadResult = await downloadModel(serial);
-      
+
       print('🔍 Full download result: $downloadResult');
-      
+
       if (downloadResult['data'] == null || downloadResult['data']['modelUrl'] == null) {
         print('❌ Download result structure: ${downloadResult.keys}');
         if (downloadResult['data'] != null) {
@@ -447,33 +447,51 @@ Future<String> downloadModelFile(String downloadUrl, String serial) async {
         }
         throw Exception('No se pudo obtener la URL de descarga. Estructura recibida: ${downloadResult.keys.join(", ")}');
       }
-      
+
       final String downloadUrl = downloadResult['data']['modelUrl'];
       print('✅ Found modelUrl: $downloadUrl');
-      
+
       onStatusUpdate?.call('Descargando archivo del modelo...');
       final localFilePath = await downloadModelFile(downloadUrl, serial);
-      
+
       onStatusUpdate?.call('Subiendo modelo a Firebase Storage...');
       final modelFile = File(localFilePath);
       final uploadResponse = await _culturalObjectService.uploadModel(
         modelFile,
-        objectName: objectName ?? 'model_$serial',
+        objectName: culturalObjectData.name,
       );
 
       onStatusUpdate?.call('Creando registro del objeto cultural...');
+
+      // FirebaseStorageController devuelve 'downloadUrl' que ya es una URL pública
+      final modelUrl = uploadResponse['downloadUrl'] ?? uploadResponse['model3dUrl'] ?? '';
+
+      print('📦 Model URL from upload: $modelUrl');
+
+      // Crear el objeto cultural con todos los datos proporcionados por el usuario
       final newObjectRequest = CulturalObjectRequest(
-        name: objectName ?? 'Objeto Escaneado',
-        description: 'Modelo 3D generado a partir de escaneo con Kiri Engine.',
-        model3dUrl: uploadResponse['gsUrl'], // Usamos la gsUrl
+        name: culturalObjectData.name,
+        description: culturalObjectData.description,
+        culturalType: culturalObjectData.culturalType,
+        theme: culturalObjectData.theme,
+        culture: culturalObjectData.culture,
+        period: culturalObjectData.period,
+        region: culturalObjectData.region,
+        latitude: culturalObjectData.latitude,
+        longitude: culturalObjectData.longitude,
+        imageUrl: culturalObjectData.imageUrl,
+        model3dUrl: modelUrl,
+        audioUrl: culturalObjectData.audioUrl,
+        videoUrl: culturalObjectData.videoUrl,
+        additionalInfo: culturalObjectData.additionalInfo,
       );
-      
+
       final createdObject = await _culturalObjectService.createObject(newObjectRequest);
       print('✅ Objeto cultural creado con ID: ${createdObject.objectId}');
 
       onStatusUpdate?.call('¡Proceso completado!');
       return localFilePath;
-      
+
     } catch (e) {
       print('❌ Process error: $e');
       throw Exception('Error en el proceso completo: $e');
@@ -482,39 +500,39 @@ Future<String> downloadModelFile(String downloadUrl, String serial) async {
   
   Future<String> processVideoAndGetModel(
     File videoFile, {
-    String? objectName,
+    required CulturalObjectRequest culturalObjectData,
     Function(String)? onStatusUpdate,
   }) async {
     try {
       onStatusUpdate?.call('Subiendo video...');
       final uploadResult = await uploadVideo(
         videoFile,
-        objectName: objectName,
+        objectName: culturalObjectData.name,
         fileFormat: 'GLB',
       );
-      
+
       String serial;
       if (uploadResult['data'] != null && uploadResult['data']['serialize'] != null) {
         serial = uploadResult['data']['serialize'];
       } else {
         throw Exception('No se pudo obtener el ID del modelo de la respuesta');
       }
-      
+
       print('✅ Video upload successful. Serial: $serial');
-      
+
       onStatusUpdate?.call('Procesando modelo 3D...');
       bool isReady = false;
       int attempts = 0;
       const maxAttempts = 60;
-      
+
       while (!isReady && attempts < maxAttempts) {
         await Future.delayed(const Duration(seconds: 30));
         attempts++;
-        
+
         try {
           final statusResult = await getModelStatus(serial);
-          
-          if (statusResult['status'] == 'completed' || 
+
+          if (statusResult['status'] == 'completed' ||
               statusResult['ready'] == true ||
               statusResult['state'] == 'FINISHED') {
             isReady = true;
@@ -532,15 +550,15 @@ Future<String> downloadModelFile(String downloadUrl, String serial) async {
           }
         }
       }
-      
+
       if (!isReady) {
         throw Exception('Timeout: El modelo no estuvo listo en 30 minutos');
       }
-      
+
       final downloadResult = await downloadModel(serial);
-      
+
       print('🔍 Full download result: $downloadResult');
-      
+
       if (downloadResult['data'] == null || downloadResult['data']['modelUrl'] == null) {
         print('❌ Download result structure: ${downloadResult.keys}');
         if (downloadResult['data'] != null) {
@@ -548,33 +566,51 @@ Future<String> downloadModelFile(String downloadUrl, String serial) async {
         }
         throw Exception('No se pudo obtener la URL de descarga. Estructura recibida: ${downloadResult.keys.join(", ")}');
       }
-      
+
       final String downloadUrl = downloadResult['data']['modelUrl'];
       print('✅ Found modelUrl: $downloadUrl');
-      
+
       onStatusUpdate?.call('Descargando archivo del modelo...');
       final localFilePath = await downloadModelFile(downloadUrl, serial);
-      
+
       onStatusUpdate?.call('Subiendo modelo a Firebase Storage...');
       final modelFile = File(localFilePath);
       final uploadResponse = await _culturalObjectService.uploadModel(
         modelFile,
-        objectName: objectName ?? 'model_$serial',
+        objectName: culturalObjectData.name,
       );
 
       onStatusUpdate?.call('Creando registro del objeto cultural...');
+
+      // FirebaseStorageController devuelve 'downloadUrl' que ya es una URL pública
+      final modelUrl = uploadResponse['downloadUrl'] ?? uploadResponse['model3dUrl'] ?? '';
+
+      print('📦 Model URL from upload: $modelUrl');
+
+      // Crear el objeto cultural con todos los datos proporcionados por el usuario
       final newObjectRequest = CulturalObjectRequest(
-        name: objectName ?? 'Objeto Escaneado desde Video',
-        description: 'Modelo 3D generado a partir de video con Kiri Engine.',
-        model3dUrl: uploadResponse['gsUrl'], // Usamos la gsUrl
+        name: culturalObjectData.name,
+        description: culturalObjectData.description,
+        culturalType: culturalObjectData.culturalType,
+        theme: culturalObjectData.theme,
+        culture: culturalObjectData.culture,
+        period: culturalObjectData.period,
+        region: culturalObjectData.region,
+        latitude: culturalObjectData.latitude,
+        longitude: culturalObjectData.longitude,
+        imageUrl: culturalObjectData.imageUrl,
+        model3dUrl: modelUrl,
+        audioUrl: culturalObjectData.audioUrl,
+        videoUrl: culturalObjectData.videoUrl,
+        additionalInfo: culturalObjectData.additionalInfo,
       );
-      
+
       final createdObject = await _culturalObjectService.createObject(newObjectRequest);
       print('✅ Objeto cultural creado con ID: ${createdObject.objectId}');
 
       onStatusUpdate?.call('¡Proceso completado!');
       return localFilePath;
-      
+
     } catch (e) {
       print('❌ Video process error: $e');
       throw Exception('Error en el proceso completo de video: $e');

@@ -73,19 +73,26 @@ class CulturalObjectService {
     required String objectName,
   }) async {
     try {
-      var uri = Uri.parse('$baseUrl/api/cultural-objects/upload-model');
+      var uri = Uri.parse('$baseUrl/api/firebase/storage/upload-model');
       var request = http.MultipartRequest('POST', uri);
-      
+
       // ✅ AGREGAR AUTENTICACIÓN
       final authHeaders = _authService.getAuthHeaders();
-      
+
+      // Obtener userId del usuario autenticado
+      String userId = 'anonymous'; // Default
+      if (_authService.currentUser != null) {
+        userId = _authService.currentUser!.userId;
+      } else {
+        print('⚠️ No authenticated user, using anonymous userId');
+      }
+
       request.headers.addAll({
-        'ngrok-skip-browser-warning': 'true',
         'User-Agent': 'DisruptonApp/1.0',
         'Accept': 'application/json',
         ...authHeaders, // ✅ IMPORTANTE: Headers de autenticación
       });
-      
+
       // Agregar el archivo
       request.files.add(
         await http.MultipartFile.fromPath(
@@ -94,12 +101,14 @@ class CulturalObjectService {
           contentType: MediaType('model', 'gltf-binary'),
         ),
       );
-      
-      // Agregar el nombre del objeto
-      request.fields['objectName'] = objectName;
-      
+
+      // ✅ Agregar campos requeridos por FirebaseStorageController
+      request.fields['userId'] = userId;
+      request.fields['modelId'] = objectName; // Usar objectName como modelId
+
       print('🔍 Uploading model to: $uri');
-      print('🔍 Object name: $objectName');
+      print('🔍 User ID: $userId');
+      print('🔍 Model ID: $objectName');
       print('🔍 File path: ${modelFile.path}');
       print('🔍 File size: ${await modelFile.length()} bytes');
       
@@ -110,34 +119,27 @@ class CulturalObjectService {
       print('🔍 Upload response body: $responseBody');
       
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // ✅ MANEJO DE RESPUESTA VACÍA O NO-JSON
-        if (responseBody.isEmpty) {
-          print('⚠️ Backend returned empty response');
-          return {
-            'success': true,
-            'message': 'Model uploaded successfully',
-            'gsUrl': 'gs://disrupton-new.firebasestorage.app/$objectName.glb',
-          };
-        }
-        
         // ✅ INTENTAR PARSEAR JSON
         try {
           final jsonResponse = json.decode(responseBody);
-          
-          // Verificar que tenga la gsUrl
-          if (jsonResponse['gsUrl'] == null) {
-            print('⚠️ Response missing gsUrl, adding default');
-            jsonResponse['gsUrl'] = 'gs://disrupton-new.firebasestorage.app/$objectName.glb';
+
+          print('✅ Upload successful!');
+          print('📦 Response: $jsonResponse');
+
+          // FirebaseStorageController devuelve 'downloadUrl' en lugar de 'gsUrl'
+          // Normalizar la respuesta para compatibilidad
+          if (jsonResponse['downloadUrl'] != null && jsonResponse['model3dUrl'] == null) {
+            jsonResponse['model3dUrl'] = jsonResponse['downloadUrl'];
           }
-          
+
           return jsonResponse;
         } catch (e) {
           print('⚠️ Response is not JSON: $responseBody');
-          // Si no es JSON pero fue exitoso (200/201), crear respuesta por defecto
+          // Si no es JSON pero fue exitoso (200/201), retornar el body como mensaje
           return {
             'success': true,
             'message': responseBody.isNotEmpty ? responseBody : 'Upload successful',
-            'gsUrl': 'gs://disrupton-new.firebasestorage.app/$objectName.glb',
+            'downloadUrl': '', // URL vacía, se debe obtener después
           };
         }
       } else if (response.statusCode == 403) {
