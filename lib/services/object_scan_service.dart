@@ -6,8 +6,14 @@ import 'package:mime/mime.dart';
 import 'package:path_provider/path_provider.dart';
 import '../config/app_config.dart';
 import 'package:archive/archive.dart';
+import 'cultural_object_service.dart';
+import '../models/cultural_object.dart';
+import 'auth_service.dart'; // Importar AuthService
+
 class ObjectScanService {
   final String baseUrl = AppConfig.baseUrl;
+  final CulturalObjectService _culturalObjectService = CulturalObjectService();
+  final AuthService _authService = AuthService(); // Instancia de AuthService
   
   Future<Map<String, dynamic>> uploadImages(
     List<File> imageFiles, {
@@ -63,11 +69,15 @@ class ObjectScanService {
       var client = http.Client();
       var request = http.MultipartRequest('POST', uri);
       
+      // Obtener headers de autenticación
+      final authHeaders = _authService.getAuthHeaders();
+      
       request.headers.addAll({
         'ngrok-skip-browser-warning': 'true',
         'User-Agent': 'DisruptonApp/1.0',
         'Accept': 'application/json',
         'Connection': 'keep-alive',
+        ...authHeaders, // Añadir los headers de autenticación
       });
       
       request.fields.addAll({
@@ -176,11 +186,15 @@ class ObjectScanService {
       var client = http.Client();
       var request = http.MultipartRequest('POST', uri);
       
+      // Obtener headers de autenticación
+      final authHeaders = _authService.getAuthHeaders();
+
       request.headers.addAll({
         'ngrok-skip-browser-warning': 'true',
         'User-Agent': 'DisruptonApp/1.0',
         'Accept': 'application/json',
         'Connection': 'keep-alive',
+        ...authHeaders, // Añadir los headers de autenticación
       });
       
       request.fields.addAll({
@@ -205,9 +219,9 @@ class ObjectScanService {
         request.files.add(multipartFile);
         print('✅ Video file added: ${videoFile.path.split('/').last}');
       } catch (e) {
-        print('❌ Error adding video file: $e');
-        client.close();
-        throw Exception('Error processing video file: $e');
+          print('❌ Error adding video file: $e');
+          client.close();
+          throw Exception('Error processing video file: $e');
       }
       
       print('🔍 Sending video request...');
@@ -252,12 +266,16 @@ class ObjectScanService {
     try {
       var uri = Uri.parse('$baseUrl/api/kiri-engine/model-status/$serial');
       
+      // Obtener headers de autenticación
+      final authHeaders = _authService.getAuthHeaders();
+
       var response = await http.get(
         uri,
         headers: {
           'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true',
           'User-Agent': 'DisruptonApp/1.0',
+          ...authHeaders, // Añadir los headers de autenticación
         },
       );
       
@@ -280,12 +298,16 @@ class ObjectScanService {
     try {
       var uri = Uri.parse('$baseUrl/api/kiri-engine/download-model/$serial');
       
+      // Obtener headers de autenticación
+      final authHeaders = _authService.getAuthHeaders();
+
       var response = await http.get(
         uri,
         headers: {
           'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true',
           'User-Agent': 'DisruptonApp/1.0',
+          ...authHeaders, // Añadir los headers de autenticación
         },
       );
       
@@ -432,7 +454,24 @@ Future<String> downloadModelFile(String downloadUrl, String serial) async {
       onStatusUpdate?.call('Descargando archivo del modelo...');
       final localFilePath = await downloadModelFile(downloadUrl, serial);
       
-      onStatusUpdate?.call('¡Modelo listo!');
+      onStatusUpdate?.call('Subiendo modelo a Firebase Storage...');
+      final modelFile = File(localFilePath);
+      final uploadResponse = await _culturalObjectService.uploadModel(
+        modelFile,
+        objectName: objectName ?? 'model_$serial',
+      );
+
+      onStatusUpdate?.call('Creando registro del objeto cultural...');
+      final newObjectRequest = CulturalObjectRequest(
+        name: objectName ?? 'Objeto Escaneado',
+        description: 'Modelo 3D generado a partir de escaneo con Kiri Engine.',
+        model3dUrl: uploadResponse['gsUrl'], // Usamos la gsUrl
+      );
+      
+      final createdObject = await _culturalObjectService.createObject(newObjectRequest);
+      print('✅ Objeto cultural creado con ID: ${createdObject.objectId}');
+
+      onStatusUpdate?.call('¡Proceso completado!');
       return localFilePath;
       
     } catch (e) {
@@ -516,7 +555,24 @@ Future<String> downloadModelFile(String downloadUrl, String serial) async {
       onStatusUpdate?.call('Descargando archivo del modelo...');
       final localFilePath = await downloadModelFile(downloadUrl, serial);
       
-      onStatusUpdate?.call('¡Modelo listo!');
+      onStatusUpdate?.call('Subiendo modelo a Firebase Storage...');
+      final modelFile = File(localFilePath);
+      final uploadResponse = await _culturalObjectService.uploadModel(
+        modelFile,
+        objectName: objectName ?? 'model_$serial',
+      );
+
+      onStatusUpdate?.call('Creando registro del objeto cultural...');
+      final newObjectRequest = CulturalObjectRequest(
+        name: objectName ?? 'Objeto Escaneado desde Video',
+        description: 'Modelo 3D generado a partir de video con Kiri Engine.',
+        model3dUrl: uploadResponse['gsUrl'], // Usamos la gsUrl
+      );
+      
+      final createdObject = await _culturalObjectService.createObject(newObjectRequest);
+      print('✅ Objeto cultural creado con ID: ${createdObject.objectId}');
+
+      onStatusUpdate?.call('¡Proceso completado!');
       return localFilePath;
       
     } catch (e) {
@@ -535,9 +591,13 @@ Future<String> downloadModelFile(String downloadUrl, String serial) async {
       
       print('🔍 Uploading featureless images to: $uri');
       
+      // Obtener headers de autenticación
+      final authHeaders = _authService.getAuthHeaders();
+
       request.headers.addAll({
         'ngrok-skip-browser-warning': 'true',
         'User-Agent': 'DisruptonApp/1.0',
+        ...authHeaders, // Añadir los headers de autenticación
       });
       
       request.fields.addAll({
@@ -580,9 +640,13 @@ Future<String> downloadModelFile(String downloadUrl, String serial) async {
       
       print('🔍 Uploading featureless video to: $uri');
       
+      // Obtener headers de autenticación
+      final authHeaders = _authService.getAuthHeaders();
+
       request.headers.addAll({
         'ngrok-skip-browser-warning': 'true',
         'User-Agent': 'DisruptonApp/1.0',
+        ...authHeaders, // Añadir los headers de autenticación
       });
       
       request.fields.addAll({

@@ -4,6 +4,7 @@ import 'cultural_agents_screen.dart';
 import 'mural_screen.dart';
 import '../widgets/onirix_ar_view.dart';
 import '../routes/app_routes.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -29,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.logout),
             onPressed: () {
               context.read<AuthProvider>().logout();
-              Navigator.pushReplacementNamed(context, '/login');
+              context.go(AppRoutes.login); // Usar context.go para GoRouter
             },
           ),
         ],
@@ -115,11 +116,25 @@ class _HomeScreenState extends State<HomeScreen> {
               childAspectRatio: 1.0,
               children: [
                 _buildFeatureCard(
+                  icon: Icons.collections,
+                  title: 'Colección Cultural',
+                  subtitle: 'Galería de objetos 3D',
+                  color: Colors.deepPurple,
+                  onTap: _navigateToCulturalObjects,
+                ),
+                _buildFeatureCard(
                   icon: Icons.view_in_ar,
                   title: 'Realidad Aumentada',
                   subtitle: 'Explora modelos 3D',
-                  color: Colors.deepPurple,
+                  color: Colors.purple,
                   onTap: _navigateToAR,
+                ),
+                _buildFeatureCard(
+                  icon: Icons.camera_alt,
+                  title: 'Escanear 3D',
+                  subtitle: 'Digitaliza objetos',
+                  color: Colors.blue,
+                  onTap: _navigateToObjectScan,
                 ),
                 _buildFeatureCard(
                   icon: Icons.people,
@@ -136,11 +151,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: _navigateToMural,
                 ),
                 _buildFeatureCard(
-                  icon: Icons.camera_alt,
-                  title: 'Escanear 3D',
-                  subtitle: 'Digitaliza objetos',
-                  color: Colors.blue,
-                  onTap: _navigateToObjectScan,
+                  icon: Icons.threed_rotation,
+                  title: 'Visor 3D',
+                  subtitle: 'Modelos interactivos',
+                  color: Colors.teal,
+                  onTap: _navigateTo3DViewer,
                 ),
               ],
             ),
@@ -290,7 +305,19 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _navigateToObjectScan() {
-    Navigator.pushNamed(context, AppRoutes.objectScan);
+    context.go(AppRoutes.objectScan);
   }
-  
+
+  void _navigateToCulturalObjects() {
+    context.go(AppRoutes.culturalObjects);
+  }
+
+  void _navigateTo3DViewer() {
+    context.go(AppRoutes.modelViewer, extra: {
+      'modelUrl': 'https://modelviewer.dev/shared-assets/models/Astronaut.glb',
+      'modelName': 'Demo Model',
+      'isLocalFile': false,
+    });
+  }
+
 }

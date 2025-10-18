@@ -115,10 +115,29 @@ class _Model3DViewerScreenState extends State<Model3DViewerScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  widget.isLocalFile 
+                  widget.isLocalFile
                       ? 'Modelo local generado con Kiri Engine'
                       : 'Modelo generado con Kiri Engine',
                   style: const TextStyle(color: Colors.white70),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.view_in_ar, size: 16, color: Colors.white),
+                      SizedBox(width: 6),
+                      Text(
+                        'AR disponible - Toca el botón AR en el visor',
+                        style: TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -200,6 +219,9 @@ class _Model3DViewerScreenState extends State<Model3DViewerScreen> {
         ModelViewer(
           src: widget.isLocalFile ? _dataUrl! : widget.modelUrl,
           alt: 'Modelo 3D de ${widget.modelName}',
+          ar: true,
+          arModes: const ['webxr', 'scene-viewer', 'quick-look'],
+          arScale: ArScale.auto,
           autoRotate: true,
           cameraControls: true,
           backgroundColor: const Color(0xFF455A64),
@@ -348,6 +370,20 @@ class _Model3DViewerScreenState extends State<Model3DViewerScreen> {
               const Text('• Arrastrar → Rotar'),
               const Text('• Pellizcar → Zoom'),
               const Text('• Dos dedos → Mover'),
+              const Divider(),
+              const Row(
+                children: [
+                  Icon(Icons.view_in_ar, color: Colors.deepPurple, size: 20),
+                  SizedBox(width: 8),
+                  Text('Realidad Aumentada:',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
+              const SizedBox(height: 4),
+              const Text('Busca el botón AR en la esquina inferior derecha del visor.'),
+              const SizedBox(height: 4),
+              const Text('• Android: Usa WebXR o Scene Viewer'),
+              const Text('• iOS: Usa AR Quick Look'),
             ],
           ),
         ),

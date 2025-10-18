@@ -1,6 +1,6 @@
 class AppConfig {
   // Base URL for the main backend API
-  static const String baseUrl = 'https://24f3bff305ac.ngrok-free.app';
+  static const String baseUrl = 'https://b191a664f483.ngrok-free.app'; // Cambiado a HTTPS
     
   // Add any other configuration constants here
   static const String appName = 'Disrupton';

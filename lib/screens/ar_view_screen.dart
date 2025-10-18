@@ -11,13 +11,13 @@ import 'package:ar_flutter_plugin_updated/models/ar_node.dart';
 import 'package:ar_flutter_plugin_updated/models/ar_anchor.dart';
 import 'package:ar_flutter_plugin_updated/widgets/ar_view.dart';
 import 'package:vector_math/vector_math_64.dart' hide Colors;
-import '../models/pieza.dart';
+import '../models/cultural_object.dart'; // ✅ CAMBIADO
 import '../utils/model_loader.dart';
 
 class ARViewScreen extends StatefulWidget {
-  final Pieza pieza;
+  final CulturalObject culturalObject; // ✅ CAMBIADO
 
-  const ARViewScreen({super.key, required this.pieza});
+  const ARViewScreen({super.key, required this.culturalObject}); // ✅ CAMBIADO
 
   @override
   State<ARViewScreen> createState() => _ARViewScreenState();
@@ -41,7 +41,7 @@ class _ARViewScreenState extends State<ARViewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.pieza.nombre} - RA'),
+        title: Text('${widget.culturalObject.name} - RA'), // ✅ CAMBIADO
         backgroundColor: Colors.black87,
         foregroundColor: Colors.white,
       ),
@@ -83,7 +83,12 @@ class _ARViewScreenState extends State<ARViewScreen> {
     if (!mounted) return;
     
     try {
-      // Mostrar indicador de carga
+      // Verificar que el objeto tenga URL de modelo 3D
+      if (widget.culturalObject.model3dUrl == null || 
+          widget.culturalObject.model3dUrl!.isEmpty) {
+        throw Exception('Este objeto cultural no tiene un modelo 3D disponible');
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Cargando modelo 3D...'),
@@ -91,13 +96,13 @@ class _ARViewScreenState extends State<ARViewScreen> {
         ),
       );
       
-      debugPrint('Iniciando carga del modelo para la pieza: ${widget.pieza.nombre}');
-      debugPrint('URL del modelo: ${widget.pieza.urlModelo3D}');
+      debugPrint('Iniciando carga del modelo para: ${widget.culturalObject.name}');
+      debugPrint('URL del modelo: ${widget.culturalObject.model3dUrl}');
       
       // Cargar el modelo desde la URL
       final modelPath = await ModelLoader.cargarModeloDesdeUrl(
-        widget.pieza.urlModelo3D,
-        widget.pieza.id,
+        widget.culturalObject.model3dUrl!,
+        widget.culturalObject.objectId,
       );
 
       if (!mounted) return;
@@ -116,22 +121,13 @@ class _ARViewScreenState extends State<ARViewScreen> {
         throw Exception('El archivo del modelo no se encontró en la ruta: $modelPath');
       }
       
-      // Crear el nodo AR
+      // Crear el nodo AR con valores por defecto
       final newNode = ARNode(
         type: NodeType.localGLTF2,
         uri: modelPath,
-        scale: Vector3.all(widget.pieza.escala),
-        position: Vector3(
-          widget.pieza.posicionInicial[0],
-          widget.pieza.posicionInicial[1],
-          widget.pieza.posicionInicial[2],
-        ),
-        rotation: Vector4(
-          widget.pieza.rotacionInicial[0],
-          widget.pieza.rotacionInicial[1],
-          widget.pieza.rotacionInicial[2],
-          1.0,
-        ),
+        scale: Vector3.all(0.5), // Escala por defecto
+        position: Vector3(0, 0, -1.5), // Posición por defecto
+        rotation: Vector4(0, 0, 0, 1.0), // Rotación por defecto
       );
 
       // Añadir el nodo a la escena AR
@@ -158,7 +154,6 @@ class _ARViewScreenState extends State<ARViewScreen> {
       
       if (!mounted) return;
       
-      // Mostrar mensaje de error al usuario
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error al cargar el modelo 3D: ${e.toString()}'),
@@ -217,7 +212,7 @@ class _ARViewScreenState extends State<ARViewScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              widget.pieza.nombre,
+              widget.culturalObject.name,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -226,14 +221,23 @@ class _ARViewScreenState extends State<ARViewScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              widget.pieza.descripcion,
+              widget.culturalObject.description,
               style: const TextStyle(color: Colors.white70),
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Época: ${widget.pieza.epoca}',
-              style: TextStyle(color: Colors.blue[300]),
-            ),
+            if (widget.culturalObject.period != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Período: ${widget.culturalObject.period}',
+                style: TextStyle(color: Colors.blue[300]),
+              ),
+            ],
+            if (widget.culturalObject.culture != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                'Cultura: ${widget.culturalObject.culture}',
+                style: TextStyle(color: Colors.blue[300]),
+              ),
+            ],
           ],
         ),
       ),
@@ -241,17 +245,14 @@ class _ARViewScreenState extends State<ARViewScreen> {
   }
 
   void _resetModel() {
-    // Resetear posición y rotación del modelo
     debugPrint('Reseteando modelo');
   }
 
   void _toggleModelVisibility() {
-    // Alternar visibilidad del modelo
     debugPrint('Alternando visibilidad del modelo');
   }
 
   void _scaleModel() {
-    // Escalar el modelo
     debugPrint('Escalando modelo');
   }
 }
