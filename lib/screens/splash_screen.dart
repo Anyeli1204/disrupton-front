@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
+import '../providers/firebase_auth_provider.dart';
 import '../services/permission_service.dart';
-import 'login_screen.dart';
-import 'home_screen.dart';
+import '../shared/layouts/bottom_navigation_layout.dart';
+import 'auth_screen.dart';
 import 'role_selection_screen.dart';
 import 'permission_flow_manager.dart';
 
@@ -27,8 +27,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (!mounted) return;
 
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    await authProvider.initialize();
+    final authProvider = Provider.of<FirebaseAuthProvider>(context, listen: false);
+    // El provider ya se inicializó en main.dart, solo verificar el estado
 
     if (!mounted) return;
 
@@ -55,13 +55,14 @@ class _SplashScreenState extends State<SplashScreen> {
           );
         } else {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            MaterialPageRoute(
+                builder: (context) => const BottomNavigationLayout()),
           );
         }
       }
     } else {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        MaterialPageRoute(builder: (context) => const AuthScreen()),
       );
     }
   }

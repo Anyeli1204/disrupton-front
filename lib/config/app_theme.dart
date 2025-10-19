@@ -1,112 +1,359 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_typography.dart';
+import '../core/theme/app_dimensions.dart';
 
+/// Tema principal de la aplicación Disrupton
+/// Implementa un diseño minimalista y moderno
 class AppTheme {
-  // Colores principales: Celeste y Amarillo
-  static const Color primaryCeleste = Color(0xFF4FC3F7); // Celeste brillante
-  static const Color primaryCelesteLight = Color(0xFF81D4FA); // Celeste claro
-  static const Color primaryCelesteDark = Color(0xFF0288D1); // Celeste oscuro
+  AppTheme._(); // Constructor privado
 
-  static const Color primaryYellow = Color(0xFFFFD54F); // Amarillo brillante
-  static const Color primaryYellowLight = Color(0xFFFFF176); // Amarillo claro
-  static const Color primaryYellowDark = Color(0xFFFF8F00); // Amarillo oscuro
+  // ========== COMPATIBILIDAD CON CÓDIGO EXISTENTE ==========
+  // Mantenemos estas propiedades para no romper el código existente
 
-  // Colores complementarios
-  static const Color backgroundLight =
-      Color(0xFFF8FDFF); // Fondo claro con toque celeste
-  static const Color backgroundDark = Color(0xFF0D47A1); // Fondo oscuro azul
-  static const Color surfaceLight = Colors.white;
-  static const Color textPrimary = Color(0xFF1A237E); // Azul oscuro para texto
-  static const Color textSecondary = Color(0xFF424242);
-  static const Color accent =
-      Color(0xFFE1F5FE); // Celeste muy claro para acentos
+  @Deprecated('Use AppColors.primary instead')
+  static const Color primaryCeleste = AppColors.primary;
 
-  // Gradientes
-  static const LinearGradient primaryGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [primaryCeleste, primaryCelesteDark],
-  );
+  @Deprecated('Use AppColors.primaryLight instead')
+  static const Color primaryCelesteLight = AppColors.primaryLight;
 
-  static const LinearGradient secondaryGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [primaryYellow, primaryYellowDark],
-  );
+  @Deprecated('Use AppColors.primaryDark instead')
+  static const Color primaryCelesteDark = AppColors.primaryDark;
 
-  static const LinearGradient backgroundGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [backgroundLight, surfaceLight],
-  );
+  @Deprecated('Use AppColors.secondary instead')
+  static const Color primaryYellow = AppColors.secondary;
 
-  // Función para obtener el color de una función basado en su índice
+  @Deprecated('Use AppColors.secondaryLight instead')
+  static const Color primaryYellowLight = AppColors.secondaryLight;
+
+  @Deprecated('Use AppColors.secondaryDark instead')
+  static const Color primaryYellowDark = AppColors.secondaryDark;
+
+  @Deprecated('Use AppColors.background instead')
+  static const Color backgroundLight = AppColors.background;
+
+  @Deprecated('Use AppColors.primaryDark instead')
+  static const Color backgroundDark = AppColors.primaryDark;
+
+  @Deprecated('Use AppColors.surface instead')
+  static const Color surfaceLight = AppColors.surface;
+
+  @Deprecated('Use AppColors.textPrimary instead')
+  static const Color textPrimary = AppColors.textPrimary;
+
+  @Deprecated('Use AppColors.textSecondary instead')
+  static const Color textSecondary = AppColors.textSecondary;
+
+  @Deprecated('Use AppColors.primaryBackground instead')
+  static const Color accent = AppColors.primaryBackground;
+
+  @Deprecated('Use AppColors.primaryGradient instead')
+  static const LinearGradient primaryGradient = AppColors.primaryGradient;
+
+  @Deprecated('Use AppColors.secondaryGradient instead')
+  static const LinearGradient secondaryGradient = AppColors.secondaryGradient;
+
+  @Deprecated('Use AppColors.subtleGradient instead')
+  static const LinearGradient backgroundGradient = AppColors.subtleGradient;
+
+  // ========== MÉTODOS HELPER (COMPATIBILIDAD) ==========
+
+  @Deprecated('Use AppColors.getColorByIndex instead')
   static Color getFunctionColor(int index) {
-    final colors = [
-      primaryCeleste,
-      primaryYellow,
-      primaryCelesteLight,
-      primaryYellowLight,
-      primaryCelesteDark,
-      primaryYellowDark,
-      const Color(0xFF26A69A), // Teal que combina con celeste
-      const Color(0xFFFFB74D), // Naranja que combina con amarillo
-    ];
-    return colors[index % colors.length];
+    return AppColors.getColorByIndex(index);
   }
 
-  // Función para obtener el color de fondo de un ícono
+  @Deprecated('Use AppColors.getBackgroundColor instead')
   static Color getIconBackgroundColor(Color iconColor) {
-    return iconColor.withOpacity(0.1);
+    return AppColors.getBackgroundColor(iconColor);
   }
 
-  // Tema principal de la aplicación
-  static ThemeData lightTheme = ThemeData(
-    primarySwatch: MaterialColor(0xFF4FC3F7, {
-      50: const Color(0xFFE1F5FE),
-      100: const Color(0xFFB3E5FC),
-      200: const Color(0xFF81D4FA),
-      300: const Color(0xFF4FC3F7),
-      400: const Color(0xFF29B6F6),
-      500: const Color(0xFF03A9F4),
-      600: const Color(0xFF039BE5),
-      700: const Color(0xFF0288D1),
-      800: const Color(0xFF0277BD),
-      900: const Color(0xFF01579B),
-    }),
-    primaryColor: primaryCeleste,
-    colorScheme: const ColorScheme.light(
-      primary: primaryCeleste,
-      secondary: primaryYellow,
-      background: backgroundLight,
-      surface: surfaceLight,
-      onPrimary: Colors.white,
-      onSecondary: textPrimary,
-      onBackground: textPrimary,
-      onSurface: textPrimary,
-    ),
-    scaffoldBackgroundColor: backgroundLight,
-    cardColor: surfaceLight,
-    appBarTheme: const AppBarTheme(
-      backgroundColor: primaryCeleste,
-      foregroundColor: Colors.white,
-      elevation: 2,
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: primaryCeleste,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+  // ========== TEMA PRINCIPAL ==========
+
+  /// Tema principal de la aplicación (Light Mode)
+  static ThemeData get lightTheme {
+    return ThemeData(
+      useMaterial3: true,
+
+      // ========== COLOR SCHEME ==========
+      colorScheme: const ColorScheme.light(
+        primary: AppColors.primary,
+        primaryContainer: AppColors.primaryLight,
+        secondary: AppColors.secondary,
+        secondaryContainer: AppColors.secondaryLight,
+        surface: AppColors.surface,
+        background: AppColors.background,
+        error: AppColors.error,
+        onPrimary: AppColors.textOnPrimary,
+        onSecondary: AppColors.textOnSecondary,
+        onSurface: AppColors.textPrimary,
+        onBackground: AppColors.textPrimary,
+        onError: Colors.white,
+        outline: AppColors.border,
+        shadow: AppColors.shadow,
+      ),
+
+      // ========== COLORES BÁSICOS ==========
+      scaffoldBackgroundColor: AppColors.background,
+      canvasColor: AppColors.surface,
+      cardColor: AppColors.surface,
+      dividerColor: AppColors.divider,
+      disabledColor: AppColors.textDisabled,
+
+      // ========== TIPOGRAFÍA ==========
+      fontFamily: 'RobotoMono',
+      textTheme: TextTheme(
+        displayLarge: AppTypography.displayLarge,
+        displayMedium: AppTypography.displayMedium,
+        displaySmall: AppTypography.displaySmall,
+        headlineLarge: AppTypography.headlineLarge,
+        headlineMedium: AppTypography.headlineMedium,
+        headlineSmall: AppTypography.headlineSmall,
+        titleLarge: AppTypography.titleLarge,
+        titleMedium: AppTypography.titleMedium,
+        titleSmall: AppTypography.titleSmall,
+        bodyLarge: AppTypography.bodyLarge,
+        bodyMedium: AppTypography.bodyMedium,
+        bodySmall: AppTypography.bodySmall,
+        labelLarge: AppTypography.labelLarge,
+        labelMedium: AppTypography.labelMedium,
+        labelSmall: AppTypography.labelSmall,
+      ),
+
+      // ========== APP BAR ==========
+      appBarTheme: AppBarTheme(
+        backgroundColor: AppColors.surface,
+        foregroundColor: AppColors.textPrimary,
+        elevation: 0,
+        centerTitle: false,
+        titleTextStyle: AppTypography.titleLarge,
+        iconTheme: const IconThemeData(
+          color: AppColors.textPrimary,
+          size: AppDimensions.iconM,
+        ),
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
         ),
       ),
-    ),
-    cardTheme: CardThemeData(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+
+      // ========== BOTONES ==========
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.textOnPrimary,
+          elevation: AppDimensions.elevationS,
+          minimumSize: const Size(double.infinity, AppDimensions.buttonHeight),
+          padding: AppDimensions.paddingH,
+          shape: RoundedRectangleBorder(
+            borderRadius: AppDimensions.borderRadiusM,
+          ),
+          textStyle: AppTypography.buttonPrimary,
+        ),
       ),
-      color: surfaceLight,
-    ),
-    fontFamily: 'Roboto',
-  );
+
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.primary,
+          minimumSize: const Size(double.infinity, AppDimensions.buttonHeight),
+          padding: AppDimensions.paddingH,
+          side: const BorderSide(
+            color: AppColors.border,
+            width: AppDimensions.borderWidth,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: AppDimensions.borderRadiusM,
+          ),
+          textStyle: AppTypography.buttonSecondary,
+        ),
+      ),
+
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.primary,
+          padding: AppDimensions.paddingH,
+          textStyle: AppTypography.buttonText,
+        ),
+      ),
+
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          foregroundColor: AppColors.textPrimary,
+          iconSize: AppDimensions.iconM,
+        ),
+      ),
+
+      // ========== INPUTS ==========
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.surface,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppDimensions.space,
+          vertical: AppDimensions.space,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: AppDimensions.borderRadiusM,
+          borderSide: const BorderSide(
+            color: AppColors.border,
+            width: AppDimensions.borderWidth,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: AppDimensions.borderRadiusM,
+          borderSide: const BorderSide(
+            color: AppColors.border,
+            width: AppDimensions.borderWidth,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: AppDimensions.borderRadiusM,
+          borderSide: const BorderSide(
+            color: AppColors.primary,
+            width: AppDimensions.borderWidthMedium,
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: AppDimensions.borderRadiusM,
+          borderSide: const BorderSide(
+            color: AppColors.error,
+            width: AppDimensions.borderWidth,
+          ),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: AppDimensions.borderRadiusM,
+          borderSide: const BorderSide(
+            color: AppColors.error,
+            width: AppDimensions.borderWidthMedium,
+          ),
+        ),
+        labelStyle: AppTypography.inputLabel,
+        hintStyle: AppTypography.inputHint,
+        errorStyle: AppTypography.error,
+        prefixIconColor: AppColors.textSecondary,
+        suffixIconColor: AppColors.textSecondary,
+      ),
+
+      // ========== CARDS ==========
+      cardTheme: const CardThemeData(
+        color: AppColors.surface,
+        elevation: AppDimensions.elevationS,
+        shadowColor: AppColors.shadow,
+        shape: RoundedRectangleBorder(
+          borderRadius: AppDimensions.borderRadiusM,
+        ),
+        margin: AppDimensions.paddingNone,
+      ),
+
+      // ========== DIALOG ==========
+      dialogTheme: const DialogThemeData(
+        backgroundColor: AppColors.surface,
+        elevation: AppDimensions.elevationL,
+        shape: RoundedRectangleBorder(
+          borderRadius: AppDimensions.borderRadiusL,
+        ),
+        titleTextStyle: AppTypography.titleLarge,
+        contentTextStyle: AppTypography.bodyMedium,
+      ),
+
+      // ========== BOTTOM SHEET ==========
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: AppColors.surface,
+        elevation: AppDimensions.elevationL,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppDimensions.radiusL),
+          ),
+        ),
+      ),
+
+      // ========== CHIP ==========
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.overlay,
+        deleteIconColor: AppColors.textSecondary,
+        disabledColor: AppColors.textDisabled,
+        selectedColor: AppColors.primaryBackground,
+        secondarySelectedColor: AppColors.secondaryBackground,
+        padding: AppDimensions.paddingS,
+        labelStyle: AppTypography.labelMedium,
+        secondaryLabelStyle: AppTypography.labelSmall,
+        brightness: Brightness.light,
+        shape: RoundedRectangleBorder(
+          borderRadius: AppDimensions.borderRadiusS,
+        ),
+      ),
+
+      // ========== DIVIDER ==========
+      dividerTheme: const DividerThemeData(
+        color: AppColors.divider,
+        thickness: AppDimensions.borderWidthThin,
+        space: AppDimensions.spaceL,
+      ),
+
+      // ========== SNACKBAR ==========
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppColors.textPrimary,
+        contentTextStyle: AppTypography.bodyMedium.copyWith(
+          color: Colors.white,
+        ),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: AppDimensions.borderRadiusS,
+        ),
+      ),
+
+      // ========== PROGRESS INDICATOR ==========
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: AppColors.primary,
+      ),
+
+      // ========== FLOATING ACTION BUTTON ==========
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.textOnPrimary,
+        elevation: AppDimensions.elevation,
+      ),
+
+      // ========== NAVIGATION BAR ==========
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: AppColors.surface,
+        indicatorColor: AppColors.primaryBackground,
+        elevation: AppDimensions.elevationS,
+        labelTextStyle: MaterialStateProperty.all(AppTypography.labelSmall),
+        iconTheme: MaterialStateProperty.resolveWith((states) {
+          if (states.contains(MaterialState.selected)) {
+            return const IconThemeData(
+              color: AppColors.primary,
+              size: AppDimensions.iconM,
+            );
+          }
+          return const IconThemeData(
+            color: AppColors.textSecondary,
+            size: AppDimensions.iconM,
+          );
+        }),
+      ),
+
+      // ========== LIST TILE ==========
+      listTileTheme: ListTileThemeData(
+        contentPadding: AppDimensions.paddingH,
+        tileColor: AppColors.surface,
+        selectedTileColor: AppColors.primaryBackground,
+        iconColor: AppColors.textSecondary,
+        textColor: AppColors.textPrimary,
+        titleTextStyle: AppTypography.titleMedium,
+        subtitleTextStyle: AppTypography.bodySmall,
+        shape: RoundedRectangleBorder(
+          borderRadius: AppDimensions.borderRadiusS,
+        ),
+      ),
+    );
+  }
+
+  /// Tema oscuro (para futuras implementaciones)
+  static ThemeData get darkTheme {
+    // TODO: Implementar tema oscuro
+    return lightTheme;
+  }
 }

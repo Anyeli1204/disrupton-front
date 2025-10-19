@@ -457,20 +457,24 @@ class _SocialPostCardState extends State<SocialPostCard> {
 
       final result = await SocialPostService.toggleLike(_post.id);
 
-      setState(() {
-        _post = _post.copyWith(
-          likeCount: result['likeCount'],
-          likes: result['liked']
-              ? [..._post.likes, _getCurrentUserId()]
-              : _post.likes.where((id) => id != _getCurrentUserId()).toList(),
-        );
-      });
+      if (mounted) {
+        setState(() {
+          _post = _post.copyWith(
+            likeCount: result['likeCount'],
+            likes: result['liked']
+                ? [..._post.likes, _getCurrentUserId()]
+                : _post.likes.where((id) => id != _getCurrentUserId()).toList(),
+          );
+        });
+      }
 
       widget.onLike?.call(_post);
     } catch (e) {
       _showError('Error al dar like: $e');
     } finally {
-      setState(() => _isLiking = false);
+      if (mounted) {
+        setState(() => _isLiking = false);
+      }
     }
   }
 
@@ -484,19 +488,23 @@ class _SocialPostCardState extends State<SocialPostCard> {
 
       final result = await SocialPostService.toggleSave(_post.id);
 
-      setState(() {
-        _post = _post.copyWith(
-          saves: result['saved']
-              ? [..._post.saves, _getCurrentUserId()]
-              : _post.saves.where((id) => id != _getCurrentUserId()).toList(),
-        );
-      });
+      if (mounted) {
+        setState(() {
+          _post = _post.copyWith(
+            saves: result['saved']
+                ? [..._post.saves, _getCurrentUserId()]
+                : _post.saves.where((id) => id != _getCurrentUserId()).toList(),
+          );
+        });
+      }
 
       widget.onSave?.call(_post);
     } catch (e) {
       _showError('Error al guardar: $e');
     } finally {
-      setState(() => _isSaving = false);
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 

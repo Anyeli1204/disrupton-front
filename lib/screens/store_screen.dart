@@ -66,35 +66,45 @@ class _StoreScreenState extends State<StoreScreen>
 
   /// Cargar productos
   Future<void> _loadProducts() async {
+    if (!mounted) return;
     setState(() => _isLoadingProducts = true);
 
     try {
       final products = await StoreService.getAllProducts();
-      setState(() {
-        _allProducts = products;
-        _filteredProducts = products;
-        _isLoadingProducts = false;
-      });
+      if (mounted) {
+        setState(() {
+          _allProducts = products;
+          _filteredProducts = products;
+          _isLoadingProducts = false;
+        });
+      }
     } catch (e) {
       print('Error cargando productos: $e');
-      setState(() => _isLoadingProducts = false);
+      if (mounted) {
+        setState(() => _isLoadingProducts = false);
+      }
     }
   }
 
   /// Cargar servicios
   Future<void> _loadServices() async {
+    if (!mounted) return;
     setState(() => _isLoadingServices = true);
 
     try {
       final services = await StoreService.getAllServices();
-      setState(() {
-        _allServices = services;
-        _filteredServices = services;
-        _isLoadingServices = false;
-      });
+      if (mounted) {
+        setState(() {
+          _allServices = services;
+          _filteredServices = services;
+          _isLoadingServices = false;
+        });
+      }
     } catch (e) {
       print('Error cargando servicios: $e');
-      setState(() => _isLoadingServices = false);
+      if (mounted) {
+        setState(() => _isLoadingServices = false);
+      }
     }
   }
 
@@ -104,10 +114,12 @@ class _StoreScreenState extends State<StoreScreen>
       final productCats = await StoreService.getProductCategories();
       final serviceCats = await StoreService.getServiceCategories();
 
-      setState(() {
-        _productCategories = productCats;
-        _serviceCategories = serviceCats;
-      });
+      if (mounted) {
+        setState(() {
+          _productCategories = productCats;
+          _serviceCategories = serviceCats;
+        });
+      }
     } catch (e) {
       print('Error cargando categorías: $e');
     }

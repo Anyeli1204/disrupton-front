@@ -16,7 +16,7 @@ class _CulturalObjectsFeedScreenState extends State<CulturalObjectsFeedScreen>
     with AutomaticKeepAliveClientMixin {
   final List<CulturalObject> _culturalObjects = [];
   bool _isLoading = false;
-  int _page = 0;
+  bool _hasMoreData = true;
   final CulturalObjectService _culturalObjectService = CulturalObjectService();
   final int _pageSize = 10;
 
@@ -44,7 +44,7 @@ class _CulturalObjectsFeedScreenState extends State<CulturalObjectsFeedScreen>
   bool get wantKeepAlive => true;
 
   Future<void> _fetchCulturalObjects() async {
-    if (_isLoading) return;
+    if (_isLoading || !_hasMoreData) return;
 
     setState(() {
       _isLoading = true;
@@ -53,18 +53,27 @@ class _CulturalObjectsFeedScreenState extends State<CulturalObjectsFeedScreen>
     try {
       final List<CulturalObject> newObjects =
           await _culturalObjectService.fetchCulturalObjects();
+
       setState(() {
         _culturalObjects.addAll(newObjects);
-        _page++;
+        _hasMoreData = newObjects.length >= _pageSize;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al cargar objetos culturales: $e')),
-      );
-    } finally {
       setState(() {
-        _isLoading = false;
+        _hasMoreData = false;
       });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al cargar objetos culturales: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -81,7 +90,7 @@ class _CulturalObjectsFeedScreenState extends State<CulturalObjectsFeedScreen>
         onRefresh: () async {
           setState(() {
             _culturalObjects.clear();
-            _page = 0;
+            _hasMoreData = true;
           });
           await _fetchCulturalObjects();
         },

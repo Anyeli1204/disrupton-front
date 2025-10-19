@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../utils/image_helper.dart';
+import 'local_cultural_image.dart';
 
+/// Widget que maneja imágenes de manera segura usando assets locales
+/// En lugar de depender del backend, usa las imágenes almacenadas localmente
 class SafeNetworkImage extends StatelessWidget {
   final String imageUrl;
   final String? fallbackAsset;
@@ -23,57 +26,48 @@ class SafeNetworkImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.network(
-      imageUrl,
-      width: width,
-      height: height,
-      fit: fit,
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
+    // Si hay regionId, usar LocalCulturalImage para aprovechar las imágenes AR
+    if (regionId != null) {
+      return LocalCulturalImage(
+        imageUrl: imageUrl,
+        departmentId: regionId!,
+        category: category,
+        objectId: _extractObjectIdFromUrl(imageUrl),
+        width: width,
+        height: height,
+        fit: fit,
+      );
+    }
 
-        return Container(
-          width: width,
-          height: height,
-          color: Colors.grey[200],
-          child: Center(
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
-                  : null,
-            ),
-          ),
-        );
-      },
-      errorBuilder: (context, error, stackTrace) {
-        // Intentar con imagen de respaldo
-        if (fallbackAsset != null) {
-          return Image.asset(
-            fallbackAsset!,
-            width: width,
-            height: height,
-            fit: fit,
-            errorBuilder: (context, error, stackTrace) {
-              return _buildPlaceholder();
-            },
-          );
-        }
+    // Si hay fallbackAsset, usarlo directamente
+    if (fallbackAsset != null) {
+      return Image.asset(
+        fallbackAsset!,
+        width: width,
+        height: height,
+        fit: fit,
+        errorBuilder: (context, error, stackTrace) {
+          return _buildPlaceholder();
+        },
+      );
+    }
 
-        // Intentar con imagen automática basada en región o categoría
-        if (regionId != null) {
-          final workingUrl = ImageHelper.getWorkingImageForRegion(regionId!);
-          return Image.network(
-            workingUrl,
-            width: width,
-            height: height,
-            fit: fit,
-            errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
-          );
-        }
+    // Por defecto, mostrar placeholder
+    return _buildPlaceholder();
+  }
 
-        return _buildPlaceholder();
-      },
-    );
+  /// Intenta extraer un ID del objeto desde la URL para usarlo como semilla
+  String? _extractObjectIdFromUrl(String url) {
+    try {
+      final uri = Uri.parse(url);
+      final segments = uri.pathSegments;
+      if (segments.isNotEmpty) {
+        return segments.last.replaceAll(RegExp(r'\.[^.]+$'), '');
+      }
+    } catch (e) {
+      // Si falla el parsing, retornar null
+    }
+    return null;
   }
 
   Widget _buildPlaceholder() {

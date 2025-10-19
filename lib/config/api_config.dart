@@ -8,13 +8,14 @@ class ApiConfig {
   static const String iosSimulatorBaseUrl = 'http://localhost:8080';
 
   // Para desarrollo local con dispositivo físico (cambia la IP por la de tu máquina)
-  static const String physicalDeviceBaseUrl = 'http://192.168.1.100:8080';
+  static const String physicalDeviceBaseUrl = 'http://192.168.1.15:8080';
 
   // Para producción (reemplaza con tu URL de producción)
   static const String productionBaseUrl = 'https://tu-backend-url.com';
 
   // URL base actual - cambia esto según tu necesidad
-  static const String baseUrl = androidEmulatorBaseUrl;
+  // Configurado para dispositivo físico con IP local
+  static const String baseUrl = 'http://192.168.1.15:8080';
 
   // Para desarrollo rápido en Windows/Chrome usa:
   // static const String baseUrl = 'http://localhost:8080';
@@ -34,8 +35,8 @@ class ApiConfig {
   static String get verifyUrl => '$baseUrl$authEndpoint/verify';
   static String get refreshUrl => '$baseUrl$authEndpoint/refresh';
 
-  // Configuración de timeout
-  static const int timeoutSeconds = 30;
+  // Configuración de timeout (aumentado para conexiones lentas)
+  static const int timeoutSeconds = 45;
 
   // Headers por defecto
   static Map<String, String> get defaultHeaders => {

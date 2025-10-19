@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/permission_service.dart';
-import 'home_screen.dart';
+import '../shared/layouts/bottom_navigation_layout.dart';
 
 class TutorialScreen extends StatefulWidget {
   const TutorialScreen({super.key});
@@ -77,7 +77,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
 
     if (mounted) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        MaterialPageRoute(builder: (context) => const BottomNavigationLayout()),
       );
     }
   }

@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/api_config.dart';
@@ -7,6 +9,7 @@ import 'mock_event_service.dart';
 
 class EventService {
   static const String _baseUrl = '${ApiConfig.baseUrl}/events';
+  static final _timeout = Duration(seconds: ApiConfig.timeoutSeconds);
 
   // Obtener token de autenticación
   Future<String?> _getAuthToken() async {
@@ -27,22 +30,34 @@ class EventService {
   Future<List<Event>> getActiveEvents() async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await http.get(
-        Uri.parse(_baseUrl),
-        headers: headers,
-      );
+      final response = await http
+          .get(
+            Uri.parse(_baseUrl),
+            headers: headers,
+          )
+          .timeout(_timeout);
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonList = json.decode(response.body);
         return jsonList.map((json) => Event.fromJson(json)).toList();
       } else if (response.statusCode == 401) {
-        throw Exception('No autorizado. Por favor, inicia sesión nuevamente.');
+        print('No autorizado, usando datos de demostración');
+        return MockEventService.getMockEvents();
       } else {
         // Si hay error del servidor, usar datos mock como fallback
         print(
             'Backend no disponible (${response.statusCode}), usando datos de demostración...');
         return MockEventService.getMockEvents();
       }
+    } on SocketException {
+      print('Sin conexión a internet, usando datos de demostración para eventos');
+      return MockEventService.getMockEvents();
+    } on TimeoutException {
+      print('Timeout al obtener eventos, usando datos de demostración');
+      return MockEventService.getMockEvents();
+    } on HandshakeException {
+      print('Error SSL al obtener eventos, usando datos de demostración');
+      return MockEventService.getMockEvents();
     } catch (e) {
       // En caso de error de conexión, usar datos mock
       print('Error de conexión al backend, usando datos de demostración: $e');
@@ -54,24 +69,37 @@ class EventService {
   Future<List<Event>> getAllEvents() async {
     try {
       final headers = await _getAuthHeaders();
-      final response = await http.get(
-        Uri.parse('$_baseUrl?all=true'),
-        headers: headers,
-      );
+      final response = await http
+          .get(
+            Uri.parse('$_baseUrl?all=true'),
+            headers: headers,
+          )
+          .timeout(_timeout);
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonList = json.decode(response.body);
         return jsonList.map((json) => Event.fromJson(json)).toList();
       } else if (response.statusCode == 401) {
-        throw Exception('No autorizado. Por favor, inicia sesión nuevamente.');
+        print('No autorizado para ver todos los eventos, usando mock');
+        return MockEventService.getMockEvents();
       } else if (response.statusCode == 403) {
-        throw Exception('No tienes permisos para ver todos los eventos.');
+        print('Sin permisos para ver todos los eventos, usando mock');
+        return MockEventService.getMockEvents();
       } else {
         // Si hay error del servidor, usar datos mock como fallback
         print(
             'Backend no disponible (${response.statusCode}), usando datos de demostración...');
         return MockEventService.getMockEvents();
       }
+    } on SocketException {
+      print('Sin conexión a internet para eventos');
+      return MockEventService.getMockEvents();
+    } on TimeoutException {
+      print('Timeout al obtener todos los eventos');
+      return MockEventService.getMockEvents();
+    } on HandshakeException {
+      print('Error SSL al obtener todos los eventos');
+      return MockEventService.getMockEvents();
     } catch (e) {
       // En caso de error de conexión, usar datos mock
       print('Error de conexión al backend, usando datos de demostración: $e');

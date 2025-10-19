@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/event.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_typography.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final Event event;
@@ -18,6 +20,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
           _buildSliverAppBar(),
@@ -30,11 +33,12 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           ? null
           : FloatingActionButton.extended(
               onPressed: _shareEvent,
-              backgroundColor: Colors.orange,
+              backgroundColor: AppColors.primary,
               icon: const Icon(Icons.share, color: Colors.white),
-              label: const Text(
+              label: Text(
                 'Compartir',
-                style: TextStyle(color: Colors.white),
+                style:
+                    AppTypography.buttonPrimary.copyWith(color: Colors.white),
               ),
             ),
     );
@@ -44,14 +48,17 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     return SliverAppBar(
       expandedHeight: 300,
       pinned: true,
-      backgroundColor: Colors.orange,
+      backgroundColor: AppColors.primary,
       iconTheme: const IconThemeData(color: Colors.white),
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
           widget.event.title,
-          style: const TextStyle(
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: AppTypography.headlineSmall.copyWith(
             color: Colors.white,
             fontWeight: FontWeight.bold,
+            fontSize: 15,
             shadows: [
               Shadow(
                 offset: Offset(1, 1),
@@ -64,15 +71,23 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         background: Stack(
           fit: StackFit.expand,
           children: [
-            // Imagen de fondo
-            widget.event.imageUrl != null
-                ? Image.network(
+            // Imagen de fondo - Usar Image.asset para imágenes locales
+            widget.event.imageUrl != null &&
+                    widget.event.imageUrl!.startsWith('assets/')
+                ? Image.asset(
                     widget.event.imageUrl!,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) =>
                         _buildPlaceholderBackground(),
                   )
-                : _buildPlaceholderBackground(),
+                : widget.event.imageUrl != null
+                    ? Image.network(
+                        widget.event.imageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            _buildPlaceholderBackground(),
+                      )
+                    : _buildPlaceholderBackground(),
 
             // Gradiente para mejorar la legibilidad del título
             Container(
@@ -91,7 +106,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
             // Badge de estado
             Positioned(
-              top: 100,
+              top: 60,
               right: 16,
               child: _buildStatusBadge(),
             ),
@@ -108,8 +123,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.orange[300]!,
-            Colors.orange[600]!,
+            AppColors.primary.withOpacity(0.6),
+            AppColors.primary,
           ],
         ),
       ),
@@ -127,7 +142,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: widget.event.isPastEvent ? Colors.grey[600] : Colors.green,
+        color: widget.event.isPastEvent ? Colors.grey[600] : AppColors.success,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -139,10 +154,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       ),
       child: Text(
         widget.event.isPastEvent ? 'Finalizado' : 'Próximamente',
-        style: const TextStyle(
+        style: AppTypography.caption.copyWith(
           color: Colors.white,
           fontWeight: FontWeight.bold,
-          fontSize: 12,
         ),
       ),
     );
@@ -172,6 +186,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   Widget _buildTimeSection() {
     return Card(
       elevation: 2,
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -181,16 +196,18 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               children: [
                 Icon(
                   Icons.schedule,
-                  color: Colors.orange,
+                  color: AppColors.primary,
                   size: 24,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  'Fecha y Hora',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange,
-                      ),
+                Flexible(
+                  child: Text(
+                    'Fecha y Hora',
+                    style: AppTypography.titleLarge.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -199,9 +216,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             // Fecha formateada
             Text(
               _formatEventDate(widget.event.dateTime),
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: AppTypography.headlineSmall.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 4),
 
@@ -210,11 +227,12 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               widget.event.isPastEvent
                   ? 'Este evento ya ha finalizado'
                   : 'Faltan ${widget.event.timeUntilEvent}',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color:
-                        widget.event.isPastEvent ? Colors.grey : Colors.green,
-                    fontWeight: FontWeight.w500,
-                  ),
+              style: AppTypography.bodyLarge.copyWith(
+                color: widget.event.isPastEvent
+                    ? AppColors.textSecondary
+                    : AppColors.success,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
@@ -225,6 +243,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   Widget _buildLocationSection() {
     return Card(
       elevation: 2,
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -234,25 +253,27 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               children: [
                 Icon(
                   Icons.location_on,
-                  color: Colors.red,
+                  color: AppColors.error,
                   size: 24,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  'Ubicación',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red,
-                      ),
+                Flexible(
+                  child: Text(
+                    'Ubicación',
+                    style: AppTypography.titleLarge.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.error,
+                    ),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
             Text(
               widget.event.location,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: AppTypography.titleMedium.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
             if (widget.event.latitude != null &&
                 widget.event.longitude != null) ...[
@@ -262,7 +283,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 icon: const Icon(Icons.map),
                 label: const Text('Ver en mapa'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                 ),
               ),
@@ -276,6 +297,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   Widget _buildDescriptionSection() {
     return Card(
       elevation: 2,
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -285,25 +307,27 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               children: [
                 Icon(
                   Icons.description,
-                  color: Colors.purple,
+                  color: AppColors.secondary,
                   size: 24,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  'Descripción',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.purple,
-                      ),
+                Flexible(
+                  child: Text(
+                    'Descripción',
+                    style: AppTypography.titleLarge.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.secondary,
+                    ),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
             Text(
               widget.event.description,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    height: 1.5,
-                  ),
+              style: AppTypography.bodyLarge.copyWith(
+                height: 1.5,
+              ),
             ),
           ],
         ),
@@ -316,6 +340,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
     return Card(
       elevation: 2,
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -325,16 +350,18 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               children: [
                 Icon(
                   Icons.label,
-                  color: Colors.green,
+                  color: AppColors.success,
                   size: 24,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  'Categorías',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green,
-                      ),
+                Flexible(
+                  child: Text(
+                    'Categorías',
+                    style: AppTypography.titleLarge.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.success,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -345,12 +372,13 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               children: widget.event.tags
                   .map((tag) => Chip(
                         label: Text(tag),
-                        backgroundColor: Colors.green.withOpacity(0.1),
-                        labelStyle: const TextStyle(
-                          color: Colors.green,
+                        backgroundColor: AppColors.success.withOpacity(0.1),
+                        labelStyle: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.success,
                           fontWeight: FontWeight.w500,
                         ),
-                        side: BorderSide(color: Colors.green.withOpacity(0.3)),
+                        side: BorderSide(
+                            color: AppColors.success.withOpacity(0.3)),
                       ))
                   .toList(),
             ),
@@ -363,6 +391,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   Widget _buildAdditionalInfo() {
     return Card(
       elevation: 2,
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -372,16 +401,18 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               children: [
                 Icon(
                   Icons.info,
-                  color: Colors.blue,
+                  color: AppColors.primary,
                   size: 24,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  'Información adicional',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                      ),
+                Flexible(
+                  child: Text(
+                    'Información adicional',
+                    style: AppTypography.titleLarge.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -421,20 +452,20 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         Icon(
           icon,
           size: 20,
-          color: Colors.grey[600],
+          color: AppColors.textSecondary,
         ),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             label,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: AppTypography.bodyMedium,
           ),
         ),
         Text(
           value,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: AppTypography.bodyMedium.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ],
     );

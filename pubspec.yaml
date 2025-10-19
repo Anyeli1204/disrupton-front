@@ -12,9 +12,11 @@ dependencies:
   flutter:
     sdk: flutter
   
-  # Firebase (temporalmente comentado por conflicto con AR Flutter Plugin)
-  # firebase_core: ^2.32.0
-  # firebase_analytics: ^10.10.7
+  # Firebase para autenticación
+  firebase_core: ^4.2.0
+  firebase_auth: ^6.1.0
+  google_sign_in: ^6.2.0
+  android_intent_plus: ^5.3.1
   
   # Realidad Aumentada (temporalmente comentado por problemas de namespace)
   # ar_flutter_plugin: ^0.7.3
@@ -55,15 +57,32 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  
+
   assets:
     - assets/images/
+    - assets/images/departamentos_images/
+    - assets/images/ar_images/
+    - assets/images/ar_images/arequipa_ar_images/
+    - assets/images/ar_images/cusco_ar_images/
+    - assets/images/ar_images/ica_ar_images/
+    - assets/images/ar_images/lima_ar_images/
+    - assets/images/ar_images/loreto_ar_images/
+    - assets/images/ar_images/puno_ar_images/
+    - assets/images/event_images/
+    - assets/images/post_images/
+    - assets/images/productos_images/
+    - assets/images/servicios_images/
     - assets/models/
+    - assets/3D_models/
     - assets/animations/
   
-  # fonts:
-  #   - family: Roboto
-  #     fonts:
-  #       - asset: assets/fonts/Roboto-Regular.ttf
-  #       - asset: assets/fonts/Roboto-Bold.ttf
-  #         weight: 700
+  fonts:
+    - family: RobotoMono
+      fonts:
+        - asset: assets/fonts/RobotoMono-Regular.ttf
+        - asset: assets/fonts/RobotoMono-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/RobotoMono-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/RobotoMono-Light.ttf
+          weight: 300

@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'config/app_theme.dart';
-import 'providers/auth_provider.dart';
+import 'providers/firebase_auth_provider.dart';
 import 'providers/collection_provider.dart';
 import 'providers/agentes_culturales_provider.dart';
 import 'providers/favorites_provider.dart';
 import 'routes/app_routes.dart';
-// import 'package:firebase_core/firebase_core.dart';
-// import 'package:firebase_analytics/firebase_analytics.dart';
+import 'screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp();
+
+  // Inicializar Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(const MyApp());
 }
 
@@ -22,7 +28,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => AuthProvider()),
+        // Usar FirebaseAuthProvider en lugar de AuthProvider
+        ChangeNotifierProvider(
+          create: (context) => FirebaseAuthProvider()..initialize(),
+        ),
         ChangeNotifierProvider(create: (context) => CollectionProvider()),
         ChangeNotifierProvider(
             create: (context) => AgentesCulturalesProvider()),
@@ -32,8 +41,7 @@ class MyApp extends StatelessWidget {
         title: 'Disrupton App - Cultura Peruana AR',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
-        initialRoute: AppRoutes.splash,
-        routes: AppRoutes.routes,
+        home: const SplashScreen(),
         onGenerateRoute: AppRoutes.generateRoute,
       ),
     );

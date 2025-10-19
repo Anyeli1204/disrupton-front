@@ -7,7 +7,7 @@ import '../models/mural_question.dart';
 import '../models/comment.dart';
 import '../models/user.dart';
 import '../services/mural_service.dart';
-import '../providers/auth_provider.dart';
+import '../providers/firebase_auth_provider.dart';
 import '../widgets/proxy_image.dart';
 
 class MuralScreen extends StatefulWidget {
@@ -54,7 +54,8 @@ class _MuralScreenState extends State<MuralScreen> {
     });
 
     try {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final authProvider =
+          Provider.of<FirebaseAuthProvider>(context, listen: false);
       final userId = authProvider.currentUser?.userId;
 
       // 🚀 OPTIMIZACIÓN: Ejecutar ambas llamadas en paralelo
@@ -512,7 +513,7 @@ class _MuralScreenState extends State<MuralScreen> {
     try {
       HapticFeedback.lightImpact();
 
-      final authProvider = context.read<AuthProvider>();
+      final authProvider = context.read<FirebaseAuthProvider>();
       final userId = authProvider.currentUser?.userId ?? 'user_demo';
       final currentUser = authProvider.currentUser;
 
@@ -892,7 +893,7 @@ class _MuralScreenState extends State<MuralScreen> {
     try {
       HapticFeedback.lightImpact();
 
-      final authProvider = context.read<AuthProvider>();
+      final authProvider = context.read<FirebaseAuthProvider>();
       final userId = authProvider.currentUser?.userId ?? 'user_demo';
 
       await MuralService.reactToComment(
@@ -975,7 +976,7 @@ class _MuralScreenState extends State<MuralScreen> {
     try {
       HapticFeedback.lightImpact();
 
-      final authProvider = context.read<AuthProvider>();
+      final authProvider = context.read<FirebaseAuthProvider>();
       final userId = authProvider.currentUser?.userId ?? 'user_demo';
       final currentUser = authProvider.currentUser;
 

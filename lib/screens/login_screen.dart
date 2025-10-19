@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
+import '../providers/firebase_auth_provider.dart';
 import '../services/permission_service.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_dimensions.dart';
+import '../core/theme/app_typography.dart';
+import '../core/utils/validators.dart';
+import '../shared/widgets/buttons/primary_button.dart';
+import '../shared/widgets/inputs/app_text_field.dart';
+import '../shared/widgets/inputs/app_password_field.dart';
+import '../utils/network_diagnostics.dart';
+import '../config/api_config.dart';
 import 'register_screen.dart';
-import 'home_screen.dart';
+import '../shared/layouts/bottom_navigation_layout.dart';
 import 'role_selection_screen.dart';
 import 'permission_flow_manager.dart';
 
+/// Pantalla de inicio de sesión con diseño minimalista
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -18,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
+  bool _rememberMe = false;
 
   @override
   void dispose() {
@@ -32,7 +42,13 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final authProvider =
+        Provider.of<FirebaseAuthProvider>(context, listen: false);
+
+    // Mostrar información de diagnóstico en consola
+    print('🔄 Intentando login con:');
+    print('  Email: ${_emailController.text.trim()}');
+    print('  URL: ${ApiConfig.loginUrl}');
 
     final success = await authProvider.login(
       email: _emailController.text.trim(),
@@ -48,7 +64,6 @@ class _LoginScreenState extends State<LoginScreen> {
           MaterialPageRoute(builder: (context) => const RoleSelectionScreen()),
         );
       } else {
-        // For existing users with role, check only for permissions that need popup
         final permissionsNeeded =
             await PermissionService.getPermissionsNeedingPopup();
 
@@ -56,13 +71,14 @@ class _LoginScreenState extends State<LoginScreen> {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (context) => PermissionFlowManager(
-                isNewUser: false, // Existing user, no tutorial needed
+                isNewUser: false,
               ),
             ),
           );
         } else {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            MaterialPageRoute(
+                builder: (context) => const BottomNavigationLayout()),
           );
         }
       }
@@ -70,7 +86,9 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(authProvider.errorMessage ?? 'Error al iniciar sesión'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 5),
         ),
       );
     }
@@ -79,235 +97,262 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimensions.spaceXL,
+            vertical: AppDimensions.spaceS,
+          ),
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 60),
+                const SizedBox(height: AppDimensions.spaceS),
 
                 // Logo y título
-                Center(
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          color: Colors.deepPurple.shade100,
-                          borderRadius: BorderRadius.circular(60),
-                        ),
-                        child: Icon(
-                          Icons.camera_alt_outlined,
-                          size: 60,
-                          color: Colors.deepPurple.shade600,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Disrupton',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.deepPurple.shade700,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Explora la cultura con realidad aumentada',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey.shade600,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
+                _buildHeader(),
 
-                const SizedBox(height: 48),
+                const SizedBox(height: AppDimensions.spaceM),
 
-                // Título de la sección
-                Text(
-                  'Iniciar Sesión',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade800,
-                  ),
-                ),
+                // Formulario
+                _buildForm(),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: AppDimensions.spaceM),
 
-                // Campo de email
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: 'Correo electrónico',
-                    hintText: 'tu@ejemplo.com',
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.deepPurple.shade400),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor ingresa tu correo electrónico';
-                    }
-                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                      return 'Por favor ingresa un correo válido';
-                    }
-                    return null;
-                  },
-                ),
+                // Botón de login
+                _buildLoginButton(),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: AppDimensions.spaceS),
 
-                // Campo de contraseña
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  decoration: InputDecoration(
-                    labelText: 'Contraseña',
-                    hintText: 'Tu contraseña',
-                    prefixIcon: const Icon(Icons.lock_outlined),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.deepPurple.shade400),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor ingresa tu contraseña';
-                    }
-                    return null;
-                  },
-                ),
+                // Divider
+                _buildDivider(),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: AppDimensions.spaceS),
 
-                // Botón de iniciar sesión
-                Consumer<AuthProvider>(
-                  builder: (context, authProvider, child) {
-                    return SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: authProvider.isLoading ? null : _handleLogin,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurple.shade600,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 2,
-                        ),
-                        child: authProvider.isLoading
-                            ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text(
-                                'Iniciar Sesión',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                      ),
-                    );
-                  },
-                ),
+                // Link de registro
+                _buildRegisterLink(),
 
-                const SizedBox(height: 24),
-
-                // Divider con texto
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: Colors.grey.shade300)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'o',
-                        style: TextStyle(color: Colors.grey.shade600),
-                      ),
-                    ),
-                    Expanded(child: Divider(color: Colors.grey.shade300)),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-
-                // Enlace para registrarse
-                Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        '¿No tienes una cuenta? ',
-                        style: TextStyle(color: Colors.grey.shade600),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const RegisterScreen(),
-                            ),
-                          );
-                        },
-                        child: Text(
-                          'Regístrate',
-                          style: TextStyle(
-                            color: Colors.deepPurple.shade600,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 32),
+                const Spacer(), // Empuja el contenido hacia arriba
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Column(
+      children: [
+        // Logo
+        Container(
+          width: 70,
+          height: 70,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+            child: Image.asset(
+              'assets/images/minkar.png',
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+
+        const SizedBox(height: AppDimensions.spaceXS),
+
+        // Título principal
+        Text(
+          'MinkAR',
+          style: AppTypography.headlineMedium.copyWith(
+            color: AppColors.primary,
+            fontWeight: FontWeight.w700,
+            fontFamily: 'RobotoMono',
+          ),
+          textAlign: TextAlign.center,
+        ),
+
+        const SizedBox(height: 2),
+
+        // Subtítulo
+        Text(
+          'CONECTA CON TU CULTURA',
+          style: AppTypography.bodySmall.copyWith(
+            color: AppColors.textSecondary,
+            letterSpacing: 1.0,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'RobotoMono',
+            fontSize: 11,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Campo de email
+        AppTextField(
+          controller: _emailController,
+          label: 'Correo Electrónico',
+          hint: 'tu@ejemplo.com',
+          prefixIcon: Icons.email_outlined,
+          keyboardType: TextInputType.emailAddress,
+          textInputAction: TextInputAction.next,
+          validator: Validators.email,
+        ),
+
+        const SizedBox(height: AppDimensions.spaceS),
+
+        // Campo de contraseña
+        AppPasswordField(
+          controller: _passwordController,
+          label: 'Contraseña',
+          hint: 'Tu contraseña',
+          textInputAction: TextInputAction.done,
+          validator: Validators.password,
+          onFieldSubmitted: (_) => _handleLogin(),
+        ),
+
+        const SizedBox(height: AppDimensions.spaceXS),
+
+        // Recordarme y Recuperar contraseña
+        _buildRememberAndForgot(),
+      ],
+    );
+  }
+
+  Widget _buildRememberAndForgot() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // Checkbox Recordarme
+        Row(
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: Checkbox(
+                value: _rememberMe,
+                onChanged: (value) {
+                  setState(() {
+                    _rememberMe = value ?? false;
+                  });
+                },
+                activeColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              'Recordarme',
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+                fontFamily: 'RobotoMono',
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+
+        // Enlace Recuperar contraseña (alineado a la derecha)
+        GestureDetector(
+          onTap: () {
+            // TODO: Implementar recuperación de contraseña
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content:
+                    Text('Función de recuperación de contraseña próximamente'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          },
+          child: Text(
+            '¿Olvidaste tu contraseña?',
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'RobotoMono',
+              fontSize: 12,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoginButton() {
+    return Consumer<FirebaseAuthProvider>(
+      builder: (context, authProvider, child) {
+        return PrimaryButton(
+          text: 'Iniciar Sesión',
+          onPressed: _handleLogin,
+          isLoading: authProvider.isLoading,
+        );
+      },
+    );
+  }
+
+  Widget _buildDivider() {
+    return Row(
+      children: [
+        const Expanded(
+          child: Divider(color: AppColors.divider),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppDimensions.space),
+          child: Text(
+            'o',
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textTertiary,
+            ),
+          ),
+        ),
+        const Expanded(
+          child: Divider(color: AppColors.divider),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRegisterLink() {
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            '¿No tienes una cuenta? ',
+            style: AppTypography.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
+              fontFamily: 'RobotoMono',
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const RegisterScreen(),
+                ),
+              );
+            },
+            child: Text(
+              'Regístrate',
+              style: AppTypography.bodyMedium.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'RobotoMono',
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

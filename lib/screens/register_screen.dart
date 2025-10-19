@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
-import 'home_screen.dart';
+import '../providers/firebase_auth_provider.dart';
+import '../shared/layouts/bottom_navigation_layout.dart';
 import 'role_selection_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -36,7 +36,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final authProvider =
+        Provider.of<FirebaseAuthProvider>(context, listen: false);
 
     final success = await authProvider.register(
       displayName: _nameController.text.trim(),
@@ -57,7 +58,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
       } else {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(
+              builder: (context) => const BottomNavigationLayout()),
         );
       }
     } else {
@@ -307,7 +309,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 32),
 
                 // Botón de registro
-                Consumer<AuthProvider>(
+                Consumer<FirebaseAuthProvider>(
                   builder: (context, authProvider, child) {
                     return SizedBox(
                       width: double.infinity,

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/auth_models.dart';
-import '../providers/auth_provider.dart';
+import '../providers/firebase_auth_provider.dart';
 import '../services/permission_service.dart';
-import 'home_screen.dart';
+import '../shared/layouts/bottom_navigation_layout.dart';
 import 'permission_flow_manager.dart';
 
 class RoleSelectionScreen extends StatefulWidget {
@@ -102,8 +102,9 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                   onPressed: _selected == null
                       ? null
                       : () async {
-                          final auth =
-                              Provider.of<AuthProvider>(context, listen: false);
+                          final auth = Provider.of<FirebaseAuthProvider>(
+                              context,
+                              listen: false);
                           await auth.setUserRole(_selected!);
                           if (!mounted) return;
 
@@ -129,7 +130,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
 
                           Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(
-                                builder: (_) => const HomeScreen()),
+                                builder: (_) => const BottomNavigationLayout()),
                             (route) => false,
                           );
                         },

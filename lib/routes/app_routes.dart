@@ -5,13 +5,11 @@ import '../screens/register_screen.dart';
 import '../screens/role_selection_screen.dart';
 import '../screens/permission_flow_manager.dart';
 import '../screens/tutorial_screen.dart';
+import '../shared/layouts/bottom_navigation_layout.dart';
 import '../screens/home_screen.dart';
 import '../screens/collections_screen.dart';
 import '../screens/department_objects_screen.dart';
-import '../screens/ar_view_screen.dart';
-import '../screens/events_screen.dart';
-import '../screens/event_detail_screen.dart';
-import '../screens/create_edit_event_screen.dart';
+import '../screens/scraped_events_screen.dart';
 import '../screens/admin_dashboard_screen.dart';
 import '../screens/admin_events_screen.dart';
 import '../screens/moderator_screen.dart';
@@ -33,6 +31,7 @@ class AppRoutes {
   static const String roleSelection = '/role-selection';
   static const String permissionFlow = '/permission-flow';
   static const String tutorial = '/tutorial';
+  static const String main = '/main'; // Nueva ruta principal con bottom nav
   static const String home = '/home';
   static const String collections = '/collections';
   static const String departmentObjects = '/department-objects';
@@ -61,9 +60,12 @@ class AppRoutes {
       register: (context) => const RegisterScreen(),
       roleSelection: (context) => const RoleSelectionScreen(),
       tutorial: (context) => const TutorialScreen(),
+      main: (context) =>
+          const BottomNavigationLayout(), // Nueva pantalla principal
       home: (context) => const HomeScreen(),
       collections: (context) => const CollectionsScreen(),
-      events: (context) => const EventsScreen(),
+      events: (context) =>
+          const ScrapedEventsScreen(), // ✅ AHORA USA EVENTOS SCRAPEADOS
       adminDashboard: (context) => const AdminDashboardScreen(),
       adminEvents: (context) => const AdminEventsScreen(),
       moderator: (context) => const ModeratorScreen(),

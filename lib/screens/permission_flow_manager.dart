@@ -3,7 +3,7 @@ import '../models/permission_models.dart' as pm;
 import '../services/permission_service.dart';
 import '../screens/permission_popup_screen.dart';
 import '../screens/tutorial_screen.dart';
-import '../screens/home_screen.dart';
+import '../shared/layouts/bottom_navigation_layout.dart';
 
 class PermissionFlowManager extends StatefulWidget {
   final bool isNewUser;
@@ -97,7 +97,7 @@ class _PermissionFlowManagerState extends State<PermissionFlowManager> {
     if (mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => const HomeScreen(),
+          builder: (context) => const BottomNavigationLayout(),
         ),
       );
     }

@@ -1,6 +1,7 @@
 // Widget de Tile de Producto (de Yeimi)
 import 'package:flutter/material.dart';
 import '../models/product.dart';
+import '../utils/image_helper.dart';
 
 class ProductListTile extends StatelessWidget {
   final Product product;
@@ -16,25 +17,21 @@ class ProductListTile extends StatelessWidget {
         contentPadding: const EdgeInsets.all(12),
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(8.0),
-          child: product.imageUrl.isNotEmpty
-              ? Image.network(
-                  product.imageUrl,
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    width: 60,
-                    height: 60,
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.image_not_supported),
-                  ),
-                )
-              : Container(
-                  width: 60,
-                  height: 60,
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.shopping_bag),
-                ),
+          child: Image.asset(
+            ImageHelper.getImageByHash(
+              ImageHelper.productImages,
+              product.id,
+            ),
+            width: 60,
+            height: 60,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => Container(
+              width: 60,
+              height: 60,
+              color: Colors.grey[300],
+              child: const Icon(Icons.shopping_bag),
+            ),
+          ),
         ),
         title: Text(
           product.name,

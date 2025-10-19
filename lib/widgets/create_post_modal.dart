@@ -42,11 +42,12 @@ class _CreatePostModalState extends State<CreatePostModal> {
 
   @override
   Widget build(BuildContext context) {
+    print('🔥 CreatePostModal build called');
     return Container(
       height: MediaQuery.of(context).size.height * 0.9,
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        // Removemos borderRadius ya que ModalBottomSheet lo maneja
       ),
       child: Column(
         children: [
@@ -89,34 +90,87 @@ class _CreatePostModalState extends State<CreatePostModal> {
         children: [
           TextButton(
             onPressed: _isCreating ? null : () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          const Spacer(),
-          const Text(
-            'Nueva publicación',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+            child: Text(
+              'Cancelar',
+              style: TextStyle(
+                fontFamily: 'RobotoMono',
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF6B7280),
+              ),
             ),
           ),
-          const Spacer(),
-          ElevatedButton(
-            onPressed: _canPublish() && !_isCreating ? _createPost : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+          Expanded(
+            child: Text(
+              'Nuevo post',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                fontFamily: 'RobotoMono',
+                letterSpacing: -0.3,
+                color: Color(0xFF111827),
+              ),
             ),
-            child: _isCreating
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
-                : const Text('Publicar'),
+          ),
+          SizedBox(
+            height: 40,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                gradient: (_canPublish() && !_isCreating)
+                    ? LinearGradient(
+                        colors: [Color(0xFF39E079), Color(0xFF2BC965)],
+                      )
+                    : null,
+                color:
+                    (_canPublish() && !_isCreating) ? null : Color(0xFFD1D5DB),
+                boxShadow: (_canPublish() && !_isCreating)
+                    ? [
+                        BoxShadow(
+                          color: Color(0xFF39E079).withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: ElevatedButton(
+                onPressed: (_canPublish() && !_isCreating) ? _createPost : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Colors.white,
+                  shadowColor: Colors.transparent,
+                  disabledBackgroundColor: Colors.transparent,
+                  disabledForegroundColor: Colors.white.withOpacity(0.6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  elevation: 0,
+                  minimumSize: Size.zero,
+                ),
+                child: _isCreating
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        'Publicar',
+                        style: TextStyle(
+                          fontFamily: 'RobotoMono',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+              ),
+            ),
           ),
         ],
       ),
@@ -129,20 +183,22 @@ class _CreatePostModalState extends State<CreatePostModal> {
       children: [
         Row(
           children: [
-            const Icon(Icons.camera_alt, color: Colors.orange),
+            const Icon(Icons.camera_alt, color: Color(0xFF39E079)),
             const SizedBox(width: 8),
             const Text(
               'Fotos',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
+                fontFamily: 'RobotoMono',
               ),
             ),
             const Text(
               ' (requerido)',
               style: TextStyle(
-                color: Colors.red,
+                color: Color(0xFFEF4444),
                 fontSize: 12,
+                fontFamily: 'RobotoMono',
               ),
             ),
             const Spacer(),
@@ -190,12 +246,12 @@ class _CreatePostModalState extends State<CreatePostModal> {
         height: 200,
         decoration: BoxDecoration(
           border: Border.all(
-            color: Colors.orange.shade300,
+            color: Color(0xFF39E079).withOpacity(0.5),
             width: 2,
             style: BorderStyle.solid,
           ),
           borderRadius: BorderRadius.circular(12),
-          color: Colors.orange.shade50,
+          color: Color(0xFFE8FBF0),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -203,7 +259,7 @@ class _CreatePostModalState extends State<CreatePostModal> {
             Icon(
               Icons.camera_alt,
               size: 48,
-              color: Colors.orange.shade400,
+              color: Color(0xFF39E079),
             ),
             const SizedBox(height: 12),
             Text(
@@ -233,13 +289,13 @@ class _CreatePostModalState extends State<CreatePostModal> {
       onTap: _showImagePicker,
       child: Container(
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.orange.shade300),
+          border: Border.all(color: Color(0xFF39E079).withOpacity(0.5)),
           borderRadius: BorderRadius.circular(8),
-          color: Colors.orange.shade50,
+          color: Color(0xFFE8FBF0),
         ),
         child: Icon(
           Icons.add,
-          color: Colors.orange.shade600,
+          color: Color(0xFF2BC965),
           size: 32,
         ),
       ),
@@ -287,13 +343,14 @@ class _CreatePostModalState extends State<CreatePostModal> {
       children: [
         Row(
           children: [
-            const Icon(Icons.edit, color: Colors.orange),
+            const Icon(Icons.edit, color: Color(0xFF39E079)),
             const SizedBox(width: 8),
             const Text(
               'Descripción',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
+                fontFamily: 'RobotoMono',
               ),
             ),
             const Spacer(),
@@ -334,13 +391,14 @@ class _CreatePostModalState extends State<CreatePostModal> {
       children: [
         Row(
           children: [
-            const Icon(Icons.location_on, color: Colors.orange),
+            const Icon(Icons.location_on, color: Color(0xFF39E079)),
             const SizedBox(width: 8),
             const Text(
               'Ubicación',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
+                fontFamily: 'RobotoMono',
               ),
             ),
             const Text(
@@ -373,13 +431,14 @@ class _CreatePostModalState extends State<CreatePostModal> {
       children: [
         Row(
           children: [
-            const Icon(Icons.tag, color: Colors.orange),
+            const Icon(Icons.tag, color: Color(0xFF39E079)),
             const SizedBox(width: 8),
             const Text(
               'Etiquetas',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
+                fontFamily: 'RobotoMono',
               ),
             ),
             const Text(
@@ -411,13 +470,14 @@ class _CreatePostModalState extends State<CreatePostModal> {
       children: [
         Row(
           children: [
-            const Icon(Icons.security, color: Colors.orange),
+            const Icon(Icons.security, color: Color(0xFF39E079)),
             const SizedBox(width: 8),
             const Text(
               'Configuración',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
+                fontFamily: 'RobotoMono',
               ),
             ),
           ],
@@ -508,10 +568,15 @@ class _CreatePostModalState extends State<CreatePostModal> {
                 children: [
                   CircleAvatar(
                     radius: 16,
-                    backgroundColor: Colors.orange.shade300,
+                    backgroundColor: Color(0xFF39E079),
                     child: const Text(
                       'U',
-                      style: TextStyle(color: Colors.white, fontSize: 12),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontFamily: 'RobotoMono',
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),

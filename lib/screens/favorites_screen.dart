@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/favorites_provider.dart';
-import '../providers/auth_provider.dart';
+import '../providers/firebase_auth_provider.dart';
 import '../widgets/product_card.dart';
 import '../widgets/service_card.dart';
 import '../models/store_product.dart';
@@ -33,7 +33,8 @@ class _FavoritesScreenState extends State<FavoritesScreen>
   }
 
   Future<void> _initializeFavorites() async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final authProvider =
+        Provider.of<FirebaseAuthProvider>(context, listen: false);
     final favoritesProvider =
         Provider.of<FavoritesProvider>(context, listen: false);
 

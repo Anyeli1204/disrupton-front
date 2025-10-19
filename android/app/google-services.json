@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "979546276287",
+    "project_id": "disrupton-new",
+    "storage_bucket": "disrupton-new.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:979546276287:android:a80226443daf4b24a1210a",
+        "android_client_info": {
+          "package_name": "com.example.disrupton_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "979546276287-g33k6ml0p6hhi8rfs65rhgrhqa7ae9pp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.disrupton_app",
+            "certificate_hash": "085ad4afe8c2ede87e9c738300d6300b5eec2c0a"
+          }
+        },
+        {
+          "client_id": "979546276287-emp22k6s886etu64fob6uhrbeomtidlg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWm7tEGsSR2xgg909GgAFTlJjPEn5p9sI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "979546276287-emp22k6s886etu64fob6uhrbeomtidlg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "979546276287-5f53a6u3agfg1h0u6apnnf6hljh34f0k.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.disrupton.app"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:979546276287:android:f6902779ede59627a1210a",
+        "android_client_info": {
+          "package_name": "disrupton_1.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "979546276287-8rk608g3dni1gaglm0lcfg338p8mcii1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "disrupton_1.android",
+            "certificate_hash": "085ad4afe8c2ede87e9c738300d6300b5eec2c0a"
+          }
+        },
+        {
+          "client_id": "979546276287-emp22k6s886etu64fob6uhrbeomtidlg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWm7tEGsSR2xgg909GgAFTlJjPEn5p9sI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "979546276287-emp22k6s886etu64fob6uhrbeomtidlg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "979546276287-5f53a6u3agfg1h0u6apnnf6hljh34f0k.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.disrupton.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,50 @@
+type User @table {
+  displayName: String!
+  createdAt: Timestamp!
+  email: String
+  photoUrl: String
+  preferredCategories: [String]
+}
+
+type Event @table {
+  title: String!
+  description: String!
+  startDate: Timestamp!
+  endDate: Timestamp!
+  locationName: String!
+  category: String!
+  imageUrl: String
+  ticketPrice: Float
+  ticketLink: String
+  organizer: User
+  venue: Venue
+}
+
+type Venue @table {
+  name: String!
+  address: String!
+  city: String!
+  state: String!
+  zipCode: String!
+  type: String!
+  website: String
+  phoneNumber: String
+  description: String
+  imageUrl: String
+}
+
+type FavoriteEvent @table(key: ["user", "event"]) {
+  user: User!
+  event: Event!
+  createdAt: Timestamp!
+}
+
+type TicketPurchase @table {
+  user: User!
+  event: Event!
+  purchaseDate: Timestamp!
+  quantity: Int!
+  totalPrice: Float!
+  status: String!
+  confirmationNumber: String
+}

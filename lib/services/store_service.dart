@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/store_product.dart';
 import '../models/tourism_service.dart';
+import '../config/api_config.dart';
 
 class StoreService {
-  static const String baseUrl = 'http://10.0.2.2:8080/api/tienda';
+  static const String baseUrl = '${ApiConfig.baseUrl}/api/tienda';
 
   // Cache simple con timestamps
   static Map<String, dynamic> _cache = {};
@@ -26,7 +27,7 @@ class StoreService {
       final response = await http.get(
         Uri.parse('$baseUrl/productos'),
         headers: {'Content-Type': 'application/json'},
-      );
+      ).timeout(const Duration(seconds: 3));
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
@@ -48,11 +49,193 @@ class StoreService {
       }
 
       print('❌ Error en respuesta: ${response.statusCode}');
-      return [];
+      // Retornar productos mock si la API falla
+      return _getMockProducts();
     } catch (e) {
       print('❌ Error obteniendo productos: $e');
-      return [];
+      print('📦 Usando productos de prueba...');
+      // Retornar productos mock si hay error de conexión
+      return _getMockProducts();
     }
+  }
+
+  /// Productos de prueba para cuando no hay backend disponible
+  static List<StoreProduct> _getMockProducts() {
+    final now = DateTime.now().toIso8601String();
+    return [
+      StoreProduct(
+        id: 'mock-1',
+        title: 'Cerámica Burilada',
+        description:
+            'Cerámica tradicional del norte peruano con diseños únicos',
+        price: 120.0,
+        formattedPrice: 'S/ 120.00',
+        currency: 'PEN',
+        category: 'ceramica',
+        categoryDisplayName: 'Cerámica',
+        type: 'artesania',
+        typeDisplayName: 'Artesanía',
+        images: ['assets/images/productos_images/ceramica_burilada.png'],
+        location: 'Lima',
+        department: 'Lima',
+        stock: 10,
+        isActive: true,
+        availabilityStatus: 'available',
+        artisanId: 'artisan-1',
+        artisanName: 'Artesano Tradicional',
+        artisanEmail: 'artesano@example.com',
+        artisanPhone: '999999999',
+        rating: 4.5,
+        formattedRating: '4.5',
+        reviewCount: 12,
+        viewCount: 45,
+        createdAt: now,
+        updatedAt: now,
+      ),
+      StoreProduct(
+        id: 'mock-2',
+        title: 'Manto Andino',
+        description:
+            'Textil artesanal tejido a mano con patrones tradicionales',
+        price: 250.0,
+        formattedPrice: 'S/ 250.00',
+        currency: 'PEN',
+        category: 'textiles',
+        categoryDisplayName: 'Textiles',
+        type: 'artesania',
+        typeDisplayName: 'Artesanía',
+        images: ['assets/images/productos_images/manto_andino.png'],
+        location: 'Cusco',
+        department: 'Cusco',
+        stock: 5,
+        isActive: true,
+        availabilityStatus: 'available',
+        artisanId: 'artisan-2',
+        artisanName: 'Tejedora Andina',
+        artisanEmail: 'tejedora@example.com',
+        artisanPhone: '999999998',
+        rating: 5.0,
+        formattedRating: '5.0',
+        reviewCount: 25,
+        viewCount: 89,
+        createdAt: now,
+        updatedAt: now,
+      ),
+      StoreProduct(
+        id: 'mock-3',
+        title: 'Muñecas Andinas',
+        description: 'Muñecas tradicionales hechas a mano con trajes típicos',
+        price: 80.0,
+        formattedPrice: 'S/ 80.00',
+        currency: 'PEN',
+        category: 'artesania',
+        categoryDisplayName: 'Artesanía',
+        type: 'decoracion',
+        typeDisplayName: 'Decoración',
+        images: ['assets/images/productos_images/muñecas_andinas.png'],
+        location: 'Ayacucho',
+        department: 'Ayacucho',
+        stock: 15,
+        isActive: true,
+        availabilityStatus: 'available',
+        artisanId: 'artisan-3',
+        artisanName: 'Artesana Local',
+        artisanEmail: 'artesana@example.com',
+        artisanPhone: '999999997',
+        rating: 4.8,
+        formattedRating: '4.8',
+        reviewCount: 18,
+        viewCount: 67,
+        createdAt: now,
+        updatedAt: now,
+      ),
+      StoreProduct(
+        id: 'mock-4',
+        title: 'Plato de Arcilla Andino',
+        description:
+            'Plato decorativo de arcilla andina con diseños autóctonos',
+        price: 60.0,
+        formattedPrice: 'S/ 60.00',
+        currency: 'PEN',
+        category: 'ceramica',
+        categoryDisplayName: 'Cerámica',
+        type: 'decoracion',
+        typeDisplayName: 'Decoración',
+        images: ['assets/images/productos_images/plato_de_arcilla_andino.png'],
+        location: 'Puno',
+        department: 'Puno',
+        stock: 20,
+        isActive: true,
+        availabilityStatus: 'available',
+        artisanId: 'artisan-4',
+        artisanName: 'Ceramista del Altiplano',
+        artisanEmail: 'ceramista@example.com',
+        artisanPhone: '999999996',
+        rating: 4.3,
+        formattedRating: '4.3',
+        reviewCount: 9,
+        viewCount: 34,
+        createdAt: now,
+        updatedAt: now,
+      ),
+      StoreProduct(
+        id: 'mock-5',
+        title: 'Retablo Ayacuchano',
+        description:
+            'Retablo tradicional de Ayacucho con escenas costumbristas',
+        price: 180.0,
+        formattedPrice: 'S/ 180.00',
+        currency: 'PEN',
+        category: 'artesania',
+        categoryDisplayName: 'Artesanía',
+        type: 'decoracion',
+        typeDisplayName: 'Decoración',
+        images: ['assets/images/productos_images/retablo_ayacuchano.png'],
+        location: 'Ayacucho',
+        department: 'Ayacucho',
+        stock: 8,
+        isActive: true,
+        availabilityStatus: 'available',
+        artisanId: 'artisan-5',
+        artisanName: 'Maestro Retablista',
+        artisanEmail: 'retablista@example.com',
+        artisanPhone: '999999995',
+        rating: 4.9,
+        formattedRating: '4.9',
+        reviewCount: 31,
+        viewCount: 120,
+        createdAt: now,
+        updatedAt: now,
+      ),
+      StoreProduct(
+        id: 'mock-6',
+        title: 'Toro de Pucará',
+        description: 'Icónica figura de toro de cerámica símbolo de protección',
+        price: 150.0,
+        formattedPrice: 'S/ 150.00',
+        currency: 'PEN',
+        category: 'ceramica',
+        categoryDisplayName: 'Cerámica',
+        type: 'decoracion',
+        typeDisplayName: 'Decoración',
+        images: ['assets/images/productos_images/toro_de_pucara.png'],
+        location: 'Puno',
+        department: 'Puno',
+        stock: 12,
+        isActive: true,
+        availabilityStatus: 'available',
+        artisanId: 'artisan-6',
+        artisanName: 'Artesano Puneño',
+        artisanEmail: 'toro@example.com',
+        artisanPhone: '999999994',
+        rating: 4.7,
+        formattedRating: '4.7',
+        reviewCount: 22,
+        viewCount: 78,
+        createdAt: now,
+        updatedAt: now,
+      ),
+    ];
   }
 
   /// Obtener productos por categoría

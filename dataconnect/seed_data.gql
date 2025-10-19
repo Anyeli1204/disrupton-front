@@ -1,0 +1,60 @@
+mutation CreateSeedData @transaction @auth(level: PUBLIC, insecureReason: "This operation is used to populate the database with seed data and is safe to expose to the public.") {
+  user_insertMany(data: [
+    {
+      id: "550e8400-e29b-41d4-a716-446655440000",
+      createdAt: "2024-04-01T12:00:00Z",
+      displayName: "demouser1",
+    },
+    {
+      id: "550e8400-e29b-41d4-a716-446655440001",
+      createdAt: "2024-04-01T12:00:00Z",
+      displayName: "demouser2",
+    }
+  ])
+  venue_insertMany(data: [
+    {
+      id: "650e8400-e29b-41d4-a716-446655440000",
+      address: "123 Main St",
+      city: "Anytown",
+      state: "CA",
+      zipCode: "91234",
+      name: "Demo Venue 1",
+      type: "Concert Hall",
+    },
+    {
+      id: "650e8400-e29b-41d4-a716-446655440001",
+      address: "456 Elm St",
+      city: "Springfield",
+      state: "IL",
+      zipCode: "62704",
+      name: "Demo Venue 2",
+      type: "Theater",
+    }
+  ])
+  event_insertMany(data: [
+    {
+      id: "750e8400-e29b-41d4-a716-446655440000",
+      organizerId: "550e8400-e29b-41d4-a716-446655440000",
+      venueId: "650e8400-e29b-41d4-a716-446655440000",
+      category: "Music",
+      description: "Demo Event 1",
+      endDate: "2024-04-05T22:00:00Z",
+      locationName: "Demo Venue 1",
+      startDate: "2024-04-05T19:00:00Z",
+      title: "Demo Event 1",
+      ticketPrice: 25.00,
+    },
+    {
+      id: "750e8400-e29b-41d4-a716-446655440001",
+      organizerId: "550e8400-e29b-41d4-a716-446655440001",
+      venueId: "650e8400-e29b-41d4-a716-446655440001",
+      category: "Theater",
+      description: "Demo Event 2",
+      endDate: "2024-04-06T21:00:00Z",
+      locationName: "Demo Venue 2",
+      startDate: "2024-04-06T14:00:00Z",
+      title: "Demo Event 2",
+      ticketPrice: 30.00,
+    }
+  ])
+}

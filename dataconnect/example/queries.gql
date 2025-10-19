@@ -1,0 +1,32 @@
+mutation CreateUser @auth(level: USER) {
+  user_insert(data: {
+    displayName: "New User",
+    createdAt_expr: "request.time"
+  })
+}
+
+query ListVenues @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public") {
+  venues {
+    id
+    name
+    address
+  }
+}
+
+mutation UpdateEventDescription($id: UUID!, $description: String!) @auth(level: USER, insecureReason: "This operation is safe to expose to all logged in users.") {
+  event_update(
+    id: $id,
+    data: {
+      description: $description
+    }
+  )
+}
+
+query GetEventsByCategory($category: String!) @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public") {
+  events(where: {category: {eq: $category}}) {
+    id
+    title
+    startDate
+    endDate
+  }
+}
