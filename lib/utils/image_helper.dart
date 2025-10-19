@@ -46,6 +46,7 @@ class ImageHelper {
       'assets/images/ar_images/cusco_ar_images/vasijas_incaicas.png',
     ],
     'ica': [
+      'assets/images/ar_images/ica_ar_images/botella_nezca_2d.png',
       'assets/images/ar_images/ica_ar_images/cantaro_paracas.png',
       'assets/images/ar_images/ica_ar_images/craneo_paracas.png',
       'assets/images/ar_images/ica_ar_images/cuchillo_ceremonial.png',
@@ -241,6 +242,7 @@ class ImageHelper {
         'Vasijas Incaicas',
       ],
       'ica': [
+        'Botella Nazca',
         'Cántaro Paracas',
         'Cráneo Paracas',
         'Cuchillo Ceremonial',

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/collection_models.dart';
 import '../utils/image_helper.dart';
 import '../core/theme/app_colors.dart';
+import 'ar_viewer_screen.dart';
 
 class DepartmentObjectsScreen extends StatefulWidget {
   final Department department;
@@ -30,6 +31,14 @@ class _DepartmentObjectsScreenState extends State<DepartmentObjectsScreen> {
     'loreto',
     'puno',
   ];
+
+  // Mapeo de objetos a modelos 3D
+  static const Map<String, Map<String, String>> _object3DModels = {
+    'ica': {
+      'Botella Nazca': 'assets/3D_models/botella_nasca.glb',
+      // Puedes agregar más modelos aquí cuando estén disponibles
+    },
+  };
 
   @override
   void initState() {
@@ -560,23 +569,42 @@ class _DepartmentObjectsScreenState extends State<DepartmentObjectsScreen> {
                       // Botón de acción
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Función AR próximamente disponible',
-                                style: const TextStyle(
-                                  fontFamily: 'RobotoMono',
-                                  fontWeight: FontWeight.w600,
+                          final modelPath =
+                              _get3DModelPath(departmentId, objectName);
+
+                          if (modelPath != null) {
+                            // Navegar a la pantalla AR si existe el modelo 3D
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ARViewerScreen(
+                                  modelPath: modelPath,
+                                  objectName: objectName,
+                                  posterImage: imagePath,
                                 ),
                               ),
-                              backgroundColor: AppColors.primary,
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                            );
+                          } else {
+                            // Mostrar mensaje si no hay modelo 3D disponible
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Modelo 3D próximamente disponible para $objectName',
+                                  style: const TextStyle(
+                                    fontFamily: 'RobotoMono',
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                backgroundColor: AppColors.primary,
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
-                            ),
-                          );
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
@@ -620,57 +648,105 @@ class _DepartmentObjectsScreenState extends State<DepartmentObjectsScreen> {
     // Descripciones genéricas pero informativas para cada objeto
     final descriptions = {
       'arequipa': {
-        'Batán Arequipeño': 'Instrumento ancestral de piedra utilizado para moler granos y preparar alimentos. Fundamental en la cocina tradicional andina.',
-        'Disco Solar Arequipeño': 'Representación ceremonial del Sol, deidad principal de la cultura andina. Símbolo de poder y adoración.',
-        'Manto Arequipeño': 'Textil ceremonial elaborado con técnicas milenarias. Representa el estatus social y la maestría textil de la región.',
-        'Monolito Arequipeño': 'Escultura monumental en piedra que representa figuras antropomorfas o zoomorfas de la cultura preincaica.',
-        'Tumis Arequipeños': 'Cuchillos ceremoniales de metal con forma característica. Utilizados en rituales y como símbolo de autoridad.',
-        'Vasija Arequipeña': 'Cerámica utilitaria y ceremonial con diseños geométricos característicos de la región.',
+        'Batán Arequipeño':
+            'Instrumento ancestral de piedra utilizado para moler granos y preparar alimentos. Fundamental en la cocina tradicional andina.',
+        'Disco Solar Arequipeño':
+            'Representación ceremonial del Sol, deidad principal de la cultura andina. Símbolo de poder y adoración.',
+        'Manto Arequipeño':
+            'Textil ceremonial elaborado con técnicas milenarias. Representa el estatus social y la maestría textil de la región.',
+        'Monolito Arequipeño':
+            'Escultura monumental en piedra que representa figuras antropomorfas o zoomorfas de la cultura preincaica.',
+        'Tumis Arequipeños':
+            'Cuchillos ceremoniales de metal con forma característica. Utilizados en rituales y como símbolo de autoridad.',
+        'Vasija Arequipeña':
+            'Cerámica utilitaria y ceremonial con diseños geométricos característicos de la región.',
       },
       'cusco': {
-        'Ídolo Llamita': 'Figura votiva representando a la llama, animal sagrado en la cultura andina. Utilizada en ofrendas y rituales.',
-        'Machete Incaico': 'Herramienta ceremonial y utilitaria del periodo Inca. Representa la tecnología metalúrgica avanzada de la época.',
-        'Músicos Incaicos': 'Representación de músicos tocando instrumentos tradicionales. Evidencia de la importancia de la música en ceremonias.',
-        'Ofrenda Incaica': 'Conjunto de objetos ceremoniales utilizados en rituales de agradecimiento a las deidades andinas.',
-        'Quipus Incaico': 'Sistema de registro y contabilidad mediante cuerdas anudadas. Testimonio del avanzado sistema administrativo inca.',
-        'Vasijas Incaicas': 'Cerámica fina con el característico diseño policromado del periodo Inca. Uso ceremonial y utilitario.',
+        'Ídolo Llamita':
+            'Figura votiva representando a la llama, animal sagrado en la cultura andina. Utilizada en ofrendas y rituales.',
+        'Machete Incaico':
+            'Herramienta ceremonial y utilitaria del periodo Inca. Representa la tecnología metalúrgica avanzada de la época.',
+        'Músicos Incaicos':
+            'Representación de músicos tocando instrumentos tradicionales. Evidencia de la importancia de la música en ceremonias.',
+        'Ofrenda Incaica':
+            'Conjunto de objetos ceremoniales utilizados en rituales de agradecimiento a las deidades andinas.',
+        'Quipus Incaico':
+            'Sistema de registro y contabilidad mediante cuerdas anudadas. Testimonio del avanzado sistema administrativo inca.',
+        'Vasijas Incaicas':
+            'Cerámica fina con el característico diseño policromado del periodo Inca. Uso ceremonial y utilitario.',
       },
       'ica': {
-        'Cántaro Paracas': 'Cerámica ceremonial de la cultura Paracas, reconocida por su forma característica y decoración incisa.',
-        'Cráneo Paracas': 'Evidencia de la práctica de deformación craneal intencional, símbolo de estatus en la cultura Paracas.',
-        'Cuchillo Ceremonial': 'Instrumento ritual elaborado en metal. Utilizado en ceremonias religiosas de la cultura Paracas-Nazca.',
-        'Manto Paracas': 'Textil ceremonial excepcional con bordados complejos. Considerado entre los mejores textiles precolombinos.',
-        'Momia Paracas': 'Fardo funerario que muestra las avanzadas técnicas de momificación y el culto a los ancestros.',
-        'Vaso Chincha': 'Cerámica característica de la cultura Chincha, con diseños geométricos y formas distintivas.',
+        'Botella Nazca':
+            'Botella ceremonial de la cultura Nazca, caracterizada por su forma globular y decoración policromada con diseños zoomorfos y geométricos. Utilizada en rituales y como ofrenda funeraria.',
+        'Cántaro Paracas':
+            'Cerámica ceremonial de la cultura Paracas, reconocida por su forma característica y decoración incisa.',
+        'Cráneo Paracas':
+            'Evidencia de la práctica de deformación craneal intencional, símbolo de estatus en la cultura Paracas.',
+        'Cuchillo Ceremonial':
+            'Instrumento ritual elaborado en metal. Utilizado en ceremonias religiosas de la cultura Paracas-Nazca.',
+        'Manto Paracas':
+            'Textil ceremonial excepcional con bordados complejos. Considerado entre los mejores textiles precolombinos.',
+        'Momia Paracas':
+            'Fardo funerario que muestra las avanzadas técnicas de momificación y el culto a los ancestros.',
+        'Vaso Chincha':
+            'Cerámica característica de la cultura Chincha, con diseños geométricos y formas distintivas.',
       },
       'lima': {
-        'Ataúd Limeño': 'Receptáculo funerario que evidencia las complejas prácticas mortuorias de la cultura Lima.',
-        'Cetro Cacique Limeño': 'Símbolo de autoridad y poder político de los líderes de la cultura Lima.',
-        'Entierro Limeño': 'Representación de las prácticas funerarias que incluyen ofrendas y ajuar ceremonial.',
-        'Ídolos Limeños': 'Figuras votivas utilizadas en rituales religiosos de la cultura Lima costeña.',
-        'Manto Limeño': 'Textil ceremonial que demuestra la maestría textil de la cultura Lima.',
-        'Vasija Limeña': 'Cerámica utilitaria y ceremonial con diseños característicos entrelazados.',
+        'Ataúd Limeño':
+            'Receptáculo funerario que evidencia las complejas prácticas mortuorias de la cultura Lima.',
+        'Cetro Cacique Limeño':
+            'Símbolo de autoridad y poder político de los líderes de la cultura Lima.',
+        'Entierro Limeño':
+            'Representación de las prácticas funerarias que incluyen ofrendas y ajuar ceremonial.',
+        'Ídolos Limeños':
+            'Figuras votivas utilizadas en rituales religiosos de la cultura Lima costeña.',
+        'Manto Limeño':
+            'Textil ceremonial que demuestra la maestría textil de la cultura Lima.',
+        'Vasija Limeña':
+            'Cerámica utilitaria y ceremonial con diseños característicos entrelazados.',
       },
       'loreto': {
-        'Adornos Corporales': 'Ornamentos utilizados en ceremonias y como símbolo de identidad cultural amazónica.',
-        'Cerámica Loretana': 'Alfarería tradicional de las culturas amazónicas con diseños zoomorfos y antropomorfos.',
-        'Figura Antropomorfa Amazónica': 'Representación humana que refleja las creencias y cosmovisión de los pueblos amazónicos.',
-        'Herramientas Amazónicas': 'Instrumentos utilizados en la vida cotidiana y actividades de subsistencia de la selva.',
-        'Herramientas Loretanas': 'Utensilios especializados para la navegación, caza y pesca en el ambiente fluvial amazónico.',
-        'Olla Amazónica': 'Recipiente cerámico utilizado para la preparación de alimentos y bebidas ceremoniales.',
+        'Adornos Corporales':
+            'Ornamentos utilizados en ceremonias y como símbolo de identidad cultural amazónica.',
+        'Cerámica Loretana':
+            'Alfarería tradicional de las culturas amazónicas con diseños zoomorfos y antropomorfos.',
+        'Figura Antropomorfa Amazónica':
+            'Representación humana que refleja las creencias y cosmovisión de los pueblos amazónicos.',
+        'Herramientas Amazónicas':
+            'Instrumentos utilizados en la vida cotidiana y actividades de subsistencia de la selva.',
+        'Herramientas Loretanas':
+            'Utensilios especializados para la navegación, caza y pesca en el ambiente fluvial amazónico.',
+        'Olla Amazónica':
+            'Recipiente cerámico utilizado para la preparación de alimentos y bebidas ceremoniales.',
       },
       'puno': {
-        'Chullpa Sillustani': 'Torre funeraria preincaica donde se depositaban los restos de la élite de la cultura Colla.',
-        'Kero Colla': 'Vaso ceremonial de madera utilizado para beber chicha en ceremonias importantes.',
-        'Monolito Pukara': 'Escultura lítica de la cultura Pukara que representa figuras antropomorfas con atributos felínicos.',
-        'Textil Colla': 'Tejido característico del altiplano con diseños geométricos y simbología andina.',
-        'Tumi Puneño': 'Cuchillo ceremonial de metal con diseño característico utilizado en rituales.',
-        'Vasija Ceremonial Pukara': 'Cerámica fina de la cultura Pukara con decoración incisa y pintada policromada.',
+        'Chullpa Sillustani':
+            'Torre funeraria preincaica donde se depositaban los restos de la élite de la cultura Colla.',
+        'Kero Colla':
+            'Vaso ceremonial de madera utilizado para beber chicha en ceremonias importantes.',
+        'Monolito Pukara':
+            'Escultura lítica de la cultura Pukara que representa figuras antropomorfas con atributos felínicos.',
+        'Textil Colla':
+            'Tejido característico del altiplano con diseños geométricos y simbología andina.',
+        'Tumi Puneño':
+            'Cuchillo ceremonial de metal con diseño característico utilizado en rituales.',
+        'Vasija Ceremonial Pukara':
+            'Cerámica fina de la cultura Pukara con decoración incisa y pintada policromada.',
       },
     };
 
     return descriptions[departmentId]?[objectName] ??
         'Objeto cultural de gran valor histórico y patrimonial perteneciente a la rica herencia cultural del departamento de $departmentId.';
+  }
+
+  /// Obtiene el path del modelo 3D para un objeto específico
+  String? _get3DModelPath(String departmentId, String objectName) {
+    return _object3DModels[departmentId]?[objectName];
+  }
+
+  /// Verifica si un objeto tiene modelo 3D disponible
+  bool _has3DModel(String departmentId, String objectName) {
+    return _object3DModels[departmentId]?.containsKey(objectName) ?? false;
   }
 
   Widget _buildNoARContentScreen() {
