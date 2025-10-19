@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/store_product.dart';
 import '../widgets/proxy_image.dart';
+import '../core/theme/app_colors.dart';
 
 class ProductDetailModal extends StatefulWidget {
   final StoreProduct product;
@@ -60,16 +61,16 @@ class _ProductDetailModalState extends State<ProductDetailModal>
             // Contenido scrolleable
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildProductInfo(),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
                     _buildSpecs(),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
                     _buildArtisanInfo(),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
                     _buildActionButtons(),
                   ],
                 ),
@@ -273,23 +274,27 @@ class _ProductDetailModalState extends State<ProductDetailModal>
                   Text(
                     widget.product.title,
                     style: const TextStyle(
-                      fontSize: 24,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                      height: 1.2,
                     ),
+                    maxLines: 3,
+                    overflow: TextOverflow.visible,
+                    softWrap: true,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Row(
                     children: [
-                      Text(
-                        widget.product.typeIcon,
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        widget.product.typeDisplayName,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
+                      Flexible(
+                        child: Text(
+                          widget.product.typeDisplayName,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -304,19 +309,38 @@ class _ProductDetailModalState extends State<ProductDetailModal>
                 Text(
                   widget.product.formattedPrice,
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: _getCategoryColor(),
+                    color: AppColors.primary,
                   ),
                 ),
+                const SizedBox(height: 4),
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: widget.product.isAvailable
-                        ? Colors.green
-                        : Colors.orange,
+                    gradient: LinearGradient(
+                      colors: widget.product.isAvailable
+                          ? [
+                              AppColors.success,
+                              AppColors.success.withOpacity(0.8)
+                            ]
+                          : [
+                              AppColors.warning,
+                              AppColors.warning.withOpacity(0.8)
+                            ],
+                    ),
                     borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (widget.product.isAvailable
+                                ? AppColors.success
+                                : AppColors.warning)
+                            .withOpacity(0.3),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Text(
                     widget.product.isAvailable ? 'Disponible' : 'Agotado',
@@ -354,23 +378,26 @@ class _ProductDetailModalState extends State<ProductDetailModal>
             Text(
               widget.product.formattedRating,
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 15,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(width: 4),
-            Text(
-              '(${widget.product.reviewCount} reviews)',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
+            Flexible(
+              child: Text(
+                '(${widget.product.reviewCount} reviews)',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey[600],
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             const Spacer(),
             Text(
               '${widget.product.viewCount} vistas',
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 11,
                 color: Colors.grey[500],
               ),
             ),
@@ -383,18 +410,21 @@ class _ProductDetailModalState extends State<ProductDetailModal>
         Text(
           'Descripción',
           style: const TextStyle(
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
         Text(
           widget.product.description,
           style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[700],
+            fontSize: 13,
+            color: AppColors.textPrimary,
             height: 1.5,
+            letterSpacing: 0.2,
           ),
+          textAlign: TextAlign.justify,
         ),
       ],
     );
@@ -402,11 +432,12 @@ class _ProductDetailModalState extends State<ProductDetailModal>
 
   Widget _buildSpecs() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: AppColors.primaryBackground,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        border:
+            Border.all(color: AppColors.primary.withOpacity(0.3), width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -414,45 +445,59 @@ class _ProductDetailModalState extends State<ProductDetailModal>
           const Text(
             'Especificaciones',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 12),
-          _buildSpecRow('📍 Ubicación', widget.product.location),
-          _buildSpecRow('🏛️ Departamento', widget.product.department),
+          const SizedBox(height: 10),
           _buildSpecRow(
-              '📦 Stock disponible', '${widget.product.stock} unidades'),
-          _buildSpecRow('💰 Moneda', widget.product.currency),
-          _buildSpecRow('📅 Creado', _formatDate(widget.product.createdAt)),
+              'Ubicación', widget.product.location, Icons.location_on_outlined),
+          _buildSpecRow(
+              'Departamento', widget.product.department, Icons.map_outlined),
+          _buildSpecRow('Stock disponible', '${widget.product.stock} unidades',
+              Icons.inventory_2_outlined),
+          _buildSpecRow(
+              'Moneda', widget.product.currency, Icons.payments_outlined),
+          _buildSpecRow('Creado', _formatDate(widget.product.createdAt),
+              Icons.calendar_today_outlined),
         ],
       ),
     );
   }
 
-  Widget _buildSpecRow(String label, String value) {
+  Widget _buildSpecRow(String label, String value, IconData icon) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Icon(
+            icon,
+            size: 16,
+            color: AppColors.primary,
+          ),
+          const SizedBox(width: 8),
           SizedBox(
-            width: 140,
+            width: 115,
             child: Text(
               label,
               style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
+                fontSize: 12,
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
               ),
+              softWrap: true,
             ),
           ),
         ],
@@ -462,31 +507,53 @@ class _ProductDetailModalState extends State<ProductDetailModal>
 
   Widget _buildArtisanInfo() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: _getCategoryColor().withOpacity(0.05),
+        color: AppColors.primaryBackground,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _getCategoryColor().withOpacity(0.2)),
+        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '👨‍🎨 Artesano',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            children: [
+              Icon(
+                Icons.person_outline,
+                color: AppColors.primary,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Artesano',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Row(
             children: [
               Container(
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: _getCategoryColor(),
+                  gradient: LinearGradient(
+                    colors: [AppColors.primary, AppColors.secondary],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Center(
                   child: Text(
@@ -509,17 +576,23 @@ class _ProductDetailModalState extends State<ProductDetailModal>
                     Text(
                       widget.product.artisanName,
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Especialista en ${widget.product.categoryDisplayName}',
                       style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: true,
                     ),
                   ],
                 ),
@@ -537,24 +610,28 @@ class _ProductDetailModalState extends State<ProductDetailModal>
         // Botón principal de contacto
         SizedBox(
           width: double.infinity,
-          height: 50,
+          height: 52,
           child: ElevatedButton.icon(
             onPressed: () => _contactArtisan(),
-            icon: const Icon(Icons.message, color: Colors.white),
+            icon: const Icon(Icons.chat_bubble_outline,
+                color: Colors.white, size: 20),
             label: const Text(
               'Contactar Artesano',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 16,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
               ),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: _getCategoryColor(),
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              elevation: 4,
+              elevation: 2,
+              shadowColor: AppColors.primary.withOpacity(0.5),
             ),
           ),
         ),
@@ -565,34 +642,50 @@ class _ProductDetailModalState extends State<ProductDetailModal>
         Row(
           children: [
             Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _callArtisan(),
-                icon: Icon(Icons.phone, color: _getCategoryColor()),
-                label: Text(
-                  'Llamar',
-                  style: TextStyle(color: _getCategoryColor()),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: _getCategoryColor()),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              child: SizedBox(
+                height: 48,
+                child: OutlinedButton.icon(
+                  onPressed: () => _callArtisan(),
+                  icon: Icon(Icons.phone_outlined,
+                      color: AppColors.primary, size: 20),
+                  label: Text(
+                    'Llamar',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: AppColors.primary, width: 1.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _emailArtisan(),
-                icon: Icon(Icons.email, color: _getCategoryColor()),
-                label: Text(
-                  'Email',
-                  style: TextStyle(color: _getCategoryColor()),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: _getCategoryColor()),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              child: SizedBox(
+                height: 48,
+                child: OutlinedButton.icon(
+                  onPressed: () => _emailArtisan(),
+                  icon: Icon(Icons.email_outlined,
+                      color: AppColors.secondary, size: 20),
+                  label: Text(
+                    'Email',
+                    style: TextStyle(
+                      color: AppColors.secondary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: AppColors.secondary, width: 1.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),

@@ -11,11 +11,6 @@ class StoreMainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Tienda'),
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-      ),
       body: const StoreScreen(),
     );
   }

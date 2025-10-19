@@ -191,8 +191,8 @@ class _RedCulturalScreenState extends State<RedCulturalScreen> {
 
   Widget _buildModernAppBar(double headerOpacity) {
     return SliverAppBar(
-      // Further reduced height to maximize space for posts and prevent overflow
-      expandedHeight: 110,
+      // Reduced height since icon and text are now in one line
+      expandedHeight: 85,
       floating: false,
       pinned: true,
       elevation: 0,
@@ -239,6 +239,7 @@ class _RedCulturalScreenState extends State<RedCulturalScreen> {
                 children: [
                   Row(
                     children: [
+                      // Ícono y texto en la misma línea
                       Container(
                         padding: const EdgeInsets.all(7),
                         decoration: BoxDecoration(
@@ -251,7 +252,43 @@ class _RedCulturalScreenState extends State<RedCulturalScreen> {
                           size: 20,
                         ),
                       ),
-                      const Spacer(),
+                      const SizedBox(width: 10),
+                      // Texto al lado del ícono
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              'Red Cultural',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w800,
+                                fontFamily: 'RobotoMono',
+                                letterSpacing: -0.4,
+                                height: 1.0,
+                              ),
+                            ),
+                            const SizedBox(height: 1),
+                            Text(
+                              'Descubre y comparte',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.88),
+                                fontSize: 11,
+                                fontFamily: 'RobotoMono',
+                                fontWeight: FontWeight.w400,
+                                letterSpacing: 0.1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Botones de acción
                       IconButton(
                         onPressed: _showSearch,
                         padding: EdgeInsets.all(6),
@@ -269,33 +306,6 @@ class _RedCulturalScreenState extends State<RedCulturalScreen> {
                         tooltip: 'Notificaciones',
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Red Cultural',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                      fontFamily: 'RobotoMono',
-                      letterSpacing: -0.4,
-                      height: 1.0,
-                    ),
-                  ),
-                  const SizedBox(height: 1),
-                  Text(
-                    'Descubre y comparte',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.88),
-                      fontSize: 11,
-                      fontFamily: 'RobotoMono',
-                      fontWeight: FontWeight.w400,
-                      letterSpacing: 0.1,
-                    ),
                   ),
                 ],
               ),

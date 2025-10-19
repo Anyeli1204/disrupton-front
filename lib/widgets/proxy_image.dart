@@ -19,18 +19,23 @@ class ProxyImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Usar imagen local basada en el hash de la URL
+    // Si la URL ya es una ruta de asset local, usarla directamente
     String localImage;
 
-    // Determinar qué tipo de imagen es basándose en el contexto de la URL
-    if (imageUrl.contains('post') || imageUrl.contains('social')) {
+    if (imageUrl.startsWith('assets/')) {
+      // Ya es una ruta de asset local, usar directamente
+      localImage = imageUrl;
+    } else if (imageUrl.contains('post') || imageUrl.contains('social')) {
       localImage = ImageHelper.getImageByHash(ImageHelper.postImages, imageUrl);
     } else if (imageUrl.contains('product')) {
-      localImage = ImageHelper.getImageByHash(ImageHelper.productImages, imageUrl);
+      localImage =
+          ImageHelper.getImageByHash(ImageHelper.productImages, imageUrl);
     } else if (imageUrl.contains('service')) {
-      localImage = ImageHelper.getImageByHash(ImageHelper.serviceImages, imageUrl);
+      localImage =
+          ImageHelper.getImageByHash(ImageHelper.serviceImages, imageUrl);
     } else if (imageUrl.contains('event')) {
-      localImage = ImageHelper.getImageByHash(ImageHelper.eventImages, imageUrl);
+      localImage =
+          ImageHelper.getImageByHash(ImageHelper.eventImages, imageUrl);
     } else {
       // Por defecto, usar imágenes de posts
       localImage = ImageHelper.getImageByHash(ImageHelper.postImages, imageUrl);
